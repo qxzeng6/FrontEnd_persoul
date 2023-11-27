@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>User Detail</title>
+		<link rel="stylesheet" type="text/css" href="./css/common.css">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	</head>
+	<body>
+		<div id="detail">
+			<div class="app-header">
+				<div class="app-head-inner">
+					<div style="position: relative;">
+						<img class="logo" @click="isShow = !isShow" src="./assets/logo.png">
+						<div v-if="isShow" class="selectBox">
+							<h2>All</h2>
+							<div v-for="product in productList">
+								<a style="color: blue;" :href="product.url">{{product.title}}</a>
+							</div>
+						</div>
+					</div>
+					<div class="head-nav">
+						<ul v-if="username" class="nav-list">
+							<li> {{ username }}</li>
+							<li class="nav-pile">|</li>
+							<li @click="quit">Sign out</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+						<ul v-else class="nav-list">
+							<li @click="logClick">Sign In</li>
+							<li class="nav-pile">|</li>
+							<li @click="toregister">Sign up</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="user">
+				<el-form ref="form" :model="form" label-width="80px">
+					<el-form-item label="ID">
+					  <el-input  readonly  v-model="form.customer_id"></el-input>
+					</el-form-item>
+					<el-form-item label="Name">
+						<el-input readonly  v-model="form.customer_name"></el-input>
+					</el-form-item>
+					<el-form-item label="Username">
+						<el-input readonly  v-model="form.user_name"></el-input>
+					</el-form-item>
+					<el-form-item label="Kind">
+						<el-input readonly v-model="form.kind"></el-input>
+					</el-form-item>
+					<el-form-item label="Age">
+						<el-input readonly v-model="form.age"></el-input>
+					</el-form-item>
+					<el-form-item label="Gender">
+						<el-input  readonly  v-model="form.gender"></el-input>
+					  </el-form-item>
+					  <el-form-item label="Income">
+						  <el-input readonly  v-model="form.income"></el-input>
+					  </el-form-item>
+					  <el-form-item label="Marriage">
+						  <el-input readonly  v-model="form.marriage"></el-input>
+					  </el-form-item>
+					  <el-form-item label="Date of Birth">
+						  <el-input readonly v-model="form.date_of_birth"></el-input>
+					  </el-form-item>
+					  <el-form-item label="Pet Kind">
+						  <el-input readonly v-model="form.pet_kind"></el-input>
+					  </el-form-item>
+					<el-form-item label="E-mail">
+						<el-input  readonly  v-model="form.email"></el-input>
+					</el-form-item>
+					<el-form-item label="Phone Number">
+						<el-input readonly  v-model="form.phone_number"></el-input>
+					</el-form-item>
+					<el-form-item label="Street">
+						<el-input readonly v-model="form.street"></el-input>
+					</el-form-item>
+					<el-form-item label="City">
+						<el-input readonly v-model="form.city"></el-input>
+					</el-form-item>
+					<el-form-item label="State">
+						<el-input readonly  v-model="form.state"></el-input>
+					</el-form-item>
+					<el-form-item label="Zipcode">
+						<el-input readonly  v-model="form.zip_code"></el-input>
+					</el-form-item>
+					<el-form-item label="Business Category">
+						<el-input readonly v-model="form.business_category"></el-input>
+					</el-form-item>
+					<el-form-item label="Annual Income">
+						<el-input readonly v-model="form.annual_income"></el-input>
+					</el-form-item>
+					<el-form-item>
+						<el-button @click="cancel">Back</el-button>
+					</el-form-item>
+				</el-form>
+			</div>
+			<el-dialog title="Choose The Role" :visible.sync="dialogTableVisible">
+				<div style="margin-bottom: 20px;text-align: center;">
+					<el-radio v-model="type" label="1">Home</el-radio>
+					  <el-radio v-model="type" label="2">Business</el-radio>
+					  <div style="margin-top: 40px;">
+						   <el-button type="success" @click="next" >Next</el-button>
+					  </div>
+				</div>
+				
+			</el-dialog>
+		</div>
+		<script>
+			new Vue({
+				el: '#detail',
+				data:{
+					type:"1",
+					dialogTableVisible:false,
+					searchkey:'',
+					isShow: false,
+					isShowAboutDialog: false,
+					isShowLogDialog: false,
+					// isShowRegDialog: false,
+					isShowJudgeDialog: false,
+					username: '',
+					productList: [{
+						title: 'Dashboard',
+						url: './index.html'
+					}, {
+						title: 'Order List',
+						url: './orderlist.html'
+					}, {
+						title: 'Personal Information',
+						url: './userDetail.html'
+					}],
+					form: {
+					}
+				},
+				mounted() {
+					this.userdetail()
+				},
+				created() {
+					this.username = window.localStorage.getItem("userName")
+				},
+				methods:{
+					userdetail(){
+						this.form = {}
+						this.username = window.localStorage.getItem("userName")
+						const url = `http://localhost:8080/userdetail?username=${this.username}`; 
+						axios.get(url) 
+						.then(response => { 
+								if(response.data.code === 200) {
+						          this.form = response.data.data.content
+						        }
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					next(){
+						window.location.href="./register.html?type="+this.type
+					},
+					toregister(){
+						this.dialogTableVisible = true
+					},
+					topage(url){
+						window.location.href = url
+					},
+					closeTheForm() {
+						this.isShowJudgeDialog = false
+					},
+					quit() {
+						this.$confirm('Are you sure quit？', 'Tips', {
+							confirmButtonText: 'Confirm',
+							cancelButtonText: 'Cancel',
+							type: 'warning'
+						}).then(() => {
+							window.localStorage.clear()
+							this.username = ""
+							this.$forceUpdate()
+							window.location.href = "./index.html"
+						}).catch(() => {
+					
+						});
+					},
+					closeDialog(para) {
+						this[para] = false
+					},
+					aboutClick() {
+						window.location.href = "./index.html"
+					},
+					logClick() {
+						window.location.href = "./login.html"
+					},
+					regClick() {
+						this.isShowJudgeDialog = true
+					},
+					onSuccessLog(data) {
+						this.closeDialog('isShowLogDialog');
+						this.username = data.username
+					},
+					cancel(){
+						window.history.go(-1)
+					},
+				},
+			})
+		</script>
+	</body>
+</html>
+<style>
+	.user{
+		width: 800px;
+		margin: 0 auto;
+		margin-top: 20px;
+		background-color: white;
+		padding: 20px;
+		border-radius: 10px;
+	}
+</style>

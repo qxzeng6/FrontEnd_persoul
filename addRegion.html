@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Add Product</title>
+		<link rel="stylesheet" type="text/css" href="./css/common.css">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	</head>
+	<body>
+		<div id="detail">
+			<div class="app-header">
+				<div class="app-head-inner">
+					<div style="position: relative;">
+						<img class="logo" @click="isShow = !isShow" src="./assets/logo.png">
+						<div v-if="isShow" class="selectBox">
+							<h2>All</h2>
+							<div v-for="product in productList">
+								<a style="color: blue;" :href="product.url">{{product.title}}</a>
+							</div>
+						</div>
+					</div>
+					<div class="head-nav">
+						<ul v-if="username" class="nav-list">
+							<li> {{ username }}</li>
+							<li class="nav-pile">|</li>
+							<li @click="quit">Sign out</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+						<ul v-else class="nav-list">
+							<li @click="logClick">Sign In</li>
+							<li class="nav-pile">|</li>
+							<li @click="toregister">Sign up</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="addproduct">
+				<el-form ref="form" :model="form" label-width="80px">
+				  <el-form-item label="Region Name">
+				    <el-input v-model="form.region_name"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Region Manager">
+				    <el-input v-model="form.region_manager"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Store Number">
+				    <el-input type="number" v-model="form.storenum"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Sold Amount">
+				    <el-input type="number" v-model="form.soldamount"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Sold Quantity">
+				    <el-input type="number" v-model="form.soldquantity"></el-input>
+				  </el-form-item>
+				  <el-form-item>
+				    <el-button type="primary" @click="onSubmit">Save</el-button>
+				    <el-button @click="cancel">Cancel</el-button>
+				  </el-form-item>
+				</el-form>
+			</div>
+			<el-dialog title="Choose The Role" :visible.sync="dialogTableVisible">
+				<div style="margin-bottom: 20px;text-align: center;">
+					<el-radio v-model="type" label="1">Home</el-radio>
+					  <el-radio v-model="type" label="2">Business</el-radio>
+					  <div style="margin-top: 40px;">
+						   <el-button type="success" @click="next" >Next</el-button>
+					  </div>
+				</div>
+			</el-dialog>
+		</div>
+		<script>
+			new Vue({
+				el: '#detail',
+				data:{
+					type:"1",
+					dialogTableVisible:false,
+					searchkey:'',
+					isShow: false,
+					isShowAboutDialog: false,
+					isShowLogDialog: false,
+					// isShowRegDialog: false,
+					isShowJudgeDialog: false,
+					username: '',
+					form: {
+						region_name:'',
+						region_manager:'',
+						storenum:'',
+						soldamount:'',
+						soldquantity:''
+					},
+					logoFile:{},
+					imageUrl:''
+				},
+				created() {
+					this.username = window.localStorage.getItem("userName")
+				},
+				methods:{
+					uploadLogo(params){
+					      const isLt2M = params.file.size / 1024/1024  <= 10;
+					      if (isLt2M) {
+					            this.logoFile=params
+					      }
+					      return isLt2M;
+					   },
+					onSubmit() {
+						const url = 'http://localhost:8080/addregion'; 
+						const data = { 
+                            region_name: this.form.region_name,
+						    region_manager: this.form.region_manager,
+						    storenum: this.form.storenum,
+						    soldamount: this.form.soldamount,
+						    soldquantity: this.form.soldquantity
+						 }; 
+						// const config = { headers: { 'Content-Type': 'application/json' } }; 
+						let formData = new FormData()
+						for (const key in data) {
+							  formData.set(key,data[key])
+						   }
+						axios.post(url, formData) 
+							.then(response => { 
+								if(res.data.code == 0){
+									this.$notify({
+										title: 'Sucess',
+										message: 'Save Success',
+										type: "sucess"
+									});
+									setTimeout(()=>{
+										window.location.href = "./regionInfo.html"
+									},1200)
+								}
+							console.log(response.data); 
+							}) 
+							.catch(error => { 
+								console.log(error)
+								this.$notify({
+									 title: 'Error',
+									 message: 'Networking error',
+									 type: "error"
+								});
+								setTimeout(()=>{
+									window.location.href = "./regionInfo.html"
+								},1200)
+							}); 
+							this.$notify({
+								 title: 'Error',
+								 message: 'Networking error',
+								 type: "error"
+							});
+							setTimeout(()=>{
+									window.location.href = "./regionInfo.html"
+								},1200)
+					},
+					next(){
+						window.location.href="./register.html?type="+this.type
+					},
+					toregister(){
+						this.dialogTableVisible = true
+					},
+					topage(url){
+						window.location.href = url
+					},
+					closeTheForm() {
+						this.isShowJudgeDialog = false
+					},
+					quit() {
+						this.$confirm('Are you sure quit？', 'Tips', {
+							confirmButtonText: 'Confirm',
+							cancelButtonText: 'Cancel',
+							type: 'warning'
+						}).then(() => {
+							window.localStorage.clear()
+							this.username = ""
+							this.$forceUpdate()
+							window.location.href = "./index.html"
+						}).catch(() => {
+					
+						});
+					},
+					closeDialog(para) {
+						this[para] = false
+					},
+					aboutClick() {
+						window.location.href = "./index.html"
+					},
+					logClick() {
+						window.location.href = "./login.html"
+					},
+					regClick() {
+						this.isShowJudgeDialog = true
+					},
+					onSuccessLog(data) {
+						this.closeDialog('isShowLogDialog');
+						this.username = data.username
+					},
+					
+					handleAvatarSuccess(res, file) {
+						console.log(file);
+					  this.form.file = URL.createObjectURL(file.raw);
+					},
+					beforeAvatarUpload(file) {
+						console.log(file);
+					  const isJPG = file.raw.type === 'image/jpeg' || file.raw.type === 'image/png' ;
+					  const isLt2M = file.raw.size / 1024 / 1024 < 2;
+					  if (!isJPG) {
+						this.$message.error('Upload images in JPG/PNG format only!');
+					  }
+					  if (!isLt2M) {
+						this.$message.error('Uploaded images cannot exceed 2MB in size!');
+					  }
+					  if(isJPG && isLt2M){
+						  this.imageUrl = URL.createObjectURL(file.raw);
+					  }
+					  return isJPG && isLt2M;
+					},
+					cancel(){
+						window.location.href = "./regionInfo.html"
+					},
+				},
+			})
+		</script>
+	</body>
+</html>
+<style>
+	.addproduct{
+		width: 800px;
+		margin: 0 auto;
+		margin-top: 20px;
+		background-color: white;
+		padding: 20px;
+		border-radius: 10px;
+	}
+	.avatar-uploader .el-upload {
+	    border: 1px dashed #d9d9d9;
+	    border-radius: 6px;
+	    cursor: pointer;
+	    position: relative;
+	    overflow: hidden;
+	  }
+	  .avatar-uploader .el-upload:hover {
+	    border-color: #409EFF;
+	  }
+	  .avatar-uploader-icon {
+	    font-size: 28px;
+	    color: #8c939d;
+	    width: 178px;
+	    height: 178px;
+	    line-height: 178px;
+	    text-align: center;
+	  }
+	  .avatar {
+	    width: 178px;
+	    height: 178px;
+	    display: block;
+	  }
+</style>

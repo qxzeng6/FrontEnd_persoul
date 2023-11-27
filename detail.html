@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Detail</title>
+		<link rel="stylesheet" type="text/css" href="./css/common.css">
+		<link rel="stylesheet" href="./css/elindex.css">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<script src="./js/axios.min.js"></script>
+		<script src="./js/vue.min.js"></script>
+		<script src="./js/elindex.js"></script>
+	</head>
+	<body>
+		<div id="detail">
+			<div class="app-header">
+				<div class="app-head-inner">
+					<div style="position: relative;">
+						<img class="logo" @click="isShow = !isShow" src="./assets/logo.png">
+						<div v-if="isShow" class="selectBox">
+							<h2>All</h2>
+							<div v-for="product in productList">
+								<a style="color: blue;" :href="product.url">{{product.title}}</a>
+							</div>
+						</div>
+					</div>
+					<div class="head-nav">
+						<ul v-if="username" class="nav-list">
+							<li> {{ username }}</li>
+							<li class="nav-pile">|</li>
+							<li @click="quit">Sign out</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+						<ul v-else class="nav-list">
+							<li @click="logClick">Sign In</li>
+							<li class="nav-pile">|</li>
+							<li @click="toregister">Sign up</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div style="height: 60px;"></div>
+				<div class="sales-board">
+					<div class="sales-board-intro">
+						<h2>Product Details-({{product.product_name}})</h2>
+					</div>
+					<div style="display: flex;justify-content: center;margin-top: 50px;">
+						<div class="picture">
+							<!-- <img style="width: 200px;height: 200px;margin-bottom: 20px;border: 1px solid lightgrey;border-radius: 5px;" :src="product.imageURL?product.imageURL:'../../assets/images/1.png'" /> -->
+							<img style="width: 200px;height: 200px;margin-bottom: 20px;border: 1px solid lightgrey;border-radius: 5px;" :src=getImageUrl(product.image) />
+						</div>
+						<div class="sales-board-form">
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">
+									Dscription：
+								</div>
+								<div class="sales-board-line-right">
+									{{ product.product_description }} 
+								</div>
+							</div>
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">
+									Product Kind：
+								</div>
+								<div class="sales-board-line-right">
+									{{ product.product_kind }} 
+								</div>
+							</div>
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">
+									Inventory Amount：
+								</div>
+								<div class="sales-board-line-right">
+									{{ product.inventory_amount }} 
+								</div>
+							</div>
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">
+									Price in Total：
+								</div>
+								<div class="sales-board-line-right">
+									{{ product.price }} $
+								</div>
+							</div>
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">
+									Account：
+								</div>
+								<div class="sales-board-line-right">
+									<el-input-number v-model="buyNum" size="small" @change="handleChange" :min="1" :max="999" label="数量"></el-input-number>
+								</div>
+							</div>
+							<div class="sales-board-line">
+								<div class="sales-board-line-left">&nbsp;</div>
+								<div class="sales-board-line-right">
+									<div class="button" @click="confirmBuy">
+										Buy Now
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<el-dialog title="Choose The Role" :visible.sync="dialogTableVisible">
+					<div style="margin-bottom: 20px;text-align: center;">
+						<el-radio v-model="type" label="1">Home</el-radio>
+						  <el-radio v-model="type" label="2">Business</el-radio>
+						  <div style="margin-top: 40px;">
+							   <el-button type="success" @click="next" >Next</el-button>
+						  </div>
+					</div>
+					
+				</el-dialog>
+		</div>
+		<script>
+			new Vue({
+				el: '#detail',
+				data:{
+					type:"1",
+					dialogTableVisible:false,
+					msg:"123",
+					isShow: false,
+					isShowAboutDialog: false,
+					isShowLogDialog: false,
+					// isShowRegDialog: false,
+					isShowJudgeDialog: false,
+					username: '',
+					productList: [{
+						title: 'Dashboard',
+						url: './index.html'
+					}, {
+						title: 'Order List',
+						url: './orderlist.html'
+					}, {
+						title: 'Personal Information',
+						url: './userDetail.html'
+					}],
+					buyNum: 1,
+					form:{
+						id:''
+					},
+					product:{
+						image:"",
+						product_name:'',
+						price:'',
+						product_description:'',
+						product_kind:'',
+						inventory_amount:''
+					}
+				},
+				// mounted() {
+				// 	this.form.id = this.$route.query.id
+				// 	this.detail()
+				// },
+				mounted() {
+					const currentURL = window.location.href;
+					const productIdMatch = currentURL.match(/[?&]product_id=([^&]+)/);
+					this.form.id = productIdMatch ? productIdMatch[1] : null;
+					this.detail()
+				},
+				created() {
+					this.username = window.localStorage.getItem("userName")
+				},
+				methods:{
+					next(){
+						window.location.href="./register.html?type="+this.type
+					},
+					toregister(){
+						this.dialogTableVisible = true
+					},
+					handleChange(e){
+						console.log(e);
+					},
+					closeTheForm() {
+						this.isShowJudgeDialog = false
+					},
+					quit() {
+						this.$confirm('Are you sure quit？', 'Tips', {
+							confirmButtonText: 'Confirm',
+							cancelButtonText: 'Cancel',
+							type: 'warning'
+						}).then(() => {
+							window.localStorage.clear()
+							this.username = ""
+							this.$forceUpdate()
+							window.location.href = "./index.html"
+						}).catch(() => {
+					
+						});
+					},
+					closeDialog(para) {
+						this[para] = false
+					},
+					aboutClick() {
+						window.location.href = "./index.html"
+					},
+					logClick() {
+						window.location.href = "./login.html"
+					},
+					regClick() {
+						this.isShowJudgeDialog = true
+					},
+					onSuccessLog(data) {
+						this.closeDialog('isShowLogDialog');
+						this.username = data.username
+					},
+					detail(){
+						const url = `http://localhost:8080/productdetail?product_id=${this.form.id}`; 
+						axios.get(url)
+						.then(response => { 
+							if(response.data.code === 200) {
+						          this.product = response.data.data.content
+						        }else{
+									this.$notify({
+										title: 'Error',
+										message: 'No Product Information',
+										type: "error"
+									});
+									setTimeout(()=>{
+										window.history.go(-1)
+									},1200)
+								}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						this.$notify({
+							title: 'Error',
+							message: 'Networking error',
+							type: "error"
+						});
+						})
+						// axios.post('http://43.138.186.241:8099/djs-api/api/detail', this.from)
+						// 	.then((res) => {
+						// 		// TODO 替换成返回项
+						// 		if(response.data.code == 200) {
+						//           this.product = response.data.data.conten
+						// 		}else{
+						// 			this.$notify({
+						// 				title: 'Error',
+						// 				message: 'Not Found the productinfo',
+						// 				type: "error"
+						// 			});
+						// 			setTimeout(()=>{
+						// 				window.history.go(-1)
+						// 			},1200)
+						// 		}
+						// 	}, (error) => {
+						// 		console.log(error)
+						// 		this.$notify({
+						// 			 title: 'Error',
+						// 			 message: 'Networking error',
+						// 			 type: "error"
+						// 		});
+						// 	})
+					},
+					confirmBuy() {
+						let buyVersionsArray = _.map(this.versions, (item) => {
+							return item.value
+						});
+						this.username = window.localStorage.getItem("userName")
+						const url = `http://localhost:8080/purchase?product_id=${this.form.id}&buy_number=${this.buyNum}&username=${this.username}`; 
+						axios.get(url) 
+						.then(response => { 
+							if(response.data.code === 200) {
+						          this.product = response.data.data.content
+						        }else{
+									this.$notify({
+										title: 'Error',
+										message: 'Failed Process',
+										type: "error"
+									});
+									setTimeout(()=>{
+										window.history.go(-1)
+									},1200)
+								}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						this.$notify({
+							title: 'Error',
+							message: 'Networking error',
+							type: "error"
+						});
+						})
+					},
+					onParamChange(attr, val) {
+						this[attr] = val;
+					},
+					getImageUrl(imagePath){
+						const BaseUrl = "http://localhost:8080/upload/"
+						return BaseUrl+imagePath
+					},
+				},
+			})
+		</script>
+	</body>
+</html>
+<style>
+  .detail-wrap {
+    width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+    padding-top: 20px;
+  }
+
+  .detail-left {
+    float: left;
+    width: 200px;
+    text-align: center;
+  }
+
+  .detail-right {
+    float: left;
+    width: 980px;
+    margin-left: 20px;
+  }
+
+  .product-board {
+    background: #fff;
+    padding: 20px 0;
+  }
+
+  .product-board ul {
+    margin-top: 20px;
+  }
+
+  .product-board li {
+    text-align: left;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+
+  .product-board li.active,
+  .product-board li:hover {
+    background: #4fc08d;
+    color: #fff;
+  }
+
+  .product-board li a {
+    display: block;
+  }
+
+  .sales-board {
+    background: #fff;
+	width: 1200px;
+	margin: 0 auto;
+	text-align: center;
+  }
+
+  /* .sales-board-form {
+
+  } */
+
+  .sales-board-intro h2 {
+    font-size: 20px;
+    padding: 20px;
+  }
+
+  .sales-board-intro p {
+    background: #f7fcff;
+    padding: 10px 20px;
+    color: #999;
+    line-height: 1.8;
+  }
+
+  .sales-board-form {
+    padding: 30px 20px;
+    font-size: 14px;
+  }
+
+  .sales-board-line {
+    clear: both;
+    padding-bottom: 20px;
+	display: flex;
+	align-items: center;
+  }
+
+  .sales-board-line-left {
+    display: inline-block;
+    width: 200px;
+	margin-right: 20px;
+	
+  }
+
+  .sales-board-line-right {
+    display: inline-block;
+    width: 75%;
+  }
+
+  .sales-board-des {
+    border-top: 20px solid #f0f2f5;
+    padding: 15px 20px;
+  }
+
+  .sales-board-des p {
+    line-height: 1.6;
+  }
+
+  .sales-board-des h2 {
+    font-size: 20px;
+    padding-bottom: 15px;
+  }
+
+  .sales-board-des h3 {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 20px 0 10px 0;
+  }
+
+  .sales-board-des li {
+    padding: 5px 0;
+  }
+
+  .sales-board-table {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .sales-board-table th {
+    background: #4fc08d;
+    color: #fff;
+  }
+
+  .sales-board-table td {
+    border: 1px solid #f0f2f5;
+    padding: 15px;
+  }
+</style>

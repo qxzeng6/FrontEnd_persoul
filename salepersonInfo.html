@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Detail</title>
+		<link rel="stylesheet" type="text/css" href="./css/common.css">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	</head>
+	<body>
+		<div id="detail">
+			<div class="app-header">
+				<div class="app-head-inner">
+					<div style="position: relative;">
+						<img class="logo" src="./assets/logo.png">
+					</div>
+					<div class="head-nav">
+						<ul v-if="username" class="nav-list">
+							<li> {{ username }}</li>
+							<li class="nav-pile">|</li>
+							<li @click="quit">Sign out</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+						<ul v-else class="nav-list">
+							<li @click="logClick">Sign In</li>
+							<li class="nav-pile">|</li>
+							<li @click="toregister">Sign up</li>
+							<li class="nav-pile">|</li>
+							<li @click="aboutClick">Dashboard</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="daoitems">
+				<a href="./userlist.html">CustomerInfo</a>
+				<a href="./productInfo.html">ProductInfo</a>
+				<a href="./transactionInfo.html" >TransactionInfo</a>				
+				<a class="active" href="./salepersonInfo.html" >SalepersonInfo</a>
+				<a href="./storeInfo.html" >StoreInfo</a>
+				<a href="./regionInfo.html" >RegionInfo</a>
+			</div>
+			<div style="margin-left: 180px;width: 90%;">
+			<div style="display: flex;align-items: center;margin-top: 20px;margin-left: 20px;">
+				<div style="display: flex;align-items: center;">
+					<span style="width: 160px;">Saleperson ID</span><el-input v-model="formPage.id" placeholder="please type Saleperson ID"></el-input>
+				</div>
+				<div style="display: flex;align-items: center;margin-left: 20px;"> 
+					<span style="width: 80px;">Store ID</span><el-input v-model="formPage.sid" placeholder="please type Store ID"></el-input>
+				</div>
+                <div style="display: flex;align-items: center;margin-left: 20px;"> 
+					<span style="width: 80px;">Job Title</span><el-input v-model="formPage.job" placeholder="please type Job Title"></el-input>
+				</div>
+				<el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="add">+  Add</el-button>
+			</div>
+			<div class="BasicTable" style="margin-top: 20px;">
+			  <el-table ref="mytable" :row-class-name="rowClassName"
+			  border
+			   @selection-change="handleSelectionChange" :data="tableData" 
+			    :stripe="formPage == 'cyjgfxHxm' ? false : true"
+			    v-loading="loadingTable" align="center" style="width: 100%" :header-cell-style="{background: '#DAEBED !important', color: '#016F68 !important'}">
+			    <el-table-column
+			      v-if="showSelection"
+			      :key="'select2'"
+			      type="selection"
+			      width="55">
+			    </el-table-column>
+			
+			    <el-table-column
+			      v-if="showIndex"
+			      width="90"
+			      align="center"
+			      type="index"
+			      label="Serial Numver"
+			    ></el-table-column>
+			    <!-- :formatter="item.formatter ? formatterAll[item.formatter] : ''" -->
+			    <el-table-column
+			      resizable
+			      align="center"
+			      :prop="item.prop"
+			      :label="item.label"
+			      v-for="(item, index) in tableColumn"
+			      :show-overflow-tooltip="true"
+			      :width="item.width"
+			      :key="index">
+			      <template slot-scope="scope">
+			        <!-- 有formatter的情况 -->
+			        <div v-if="item.formatter">
+			          <span v-if="item.formatter == 'formatSjqcyyl'">{{scope.row[item.prop] | filterPercent }}</span>
+			          
+			          <div v-else-if="item.formatter == 'formatImage'">
+			            <img v-if="item.clickFn" @click="clickFnAll(scope.row, item.clickFn)" style="cursor: pointer;text-decoration: underline;width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
+			            <img v-else style="width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
+			          </div>
+			
+			          <span v-else>{{ formatterAll[item.formatter](scope.row[item.prop]) }}</span>
+			        </div>
+			
+			        <div v-else-if="item.clickFn">
+			          <span v-if="item.clickFn == 'toEqartFn'" :class="{'gantaCur': scope.row.eqart=='1101001003'}" @click="clickFnAll(scope.row, item.clickFn)">{{ formatterAll[item.formatter](scope.row[item.prop]) }}</span>
+			          <span v-else style="cursor: pointer;color: #409eff;text-decoration: underline;" @click="clickFnAll(scope.row, item.clickFn)">{{scope.row[item.prop] }}</span>
+			        </div>
+			
+			        <!-- 不加百分比 -->
+			        <span v-else>{{scope.row[item.prop] }}</span>
+			
+			      </template>
+			    </el-table-column>
+			
+			    <el-table-column label="Operation" align="center" width="280" v-if="showOperation">
+			      <template slot-scope="scope">
+			        <el-button
+			          v-for="(btnItem, btnIndex) in rowBtn"
+			          :key="btnIndex"
+			          size="mini"
+			          class="btn"
+			          type="primary"
+			          @click="btnItem.btnFn(scope.row)"
+			        >
+			          <!-- <i class="el-icon-document"></i> -->
+			          {{ btnItem.btnLabel }}
+			        </el-button>
+			      </template>
+			    </el-table-column>
+			  </el-table>
+			  <div class="pagination_box">
+			    <el-pagination
+			      v-if="showPagination"
+			      background
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-page="paginationData.pageNum"
+			      :page-sizes="[10, 20, 50, 100]"
+			      :page-size="paginationData.pageSize"
+			      layout="prev, pager, next, sizes, total, jumper"
+			      :total="paginationData.totalSize"
+			    >
+			    </el-pagination>
+			  </div>
+			</div>
+			</div>
+			<el-dialog title="Choose The Role" :visible.sync="dialogTableVisible">
+				<div style="margin-bottom: 20px;text-align: center;">
+					<el-radio v-model="type" label="1">Home</el-radio>
+					  <el-radio v-model="type" label="2">Business</el-radio>
+					  <div style="margin-top: 40px;">
+						   <el-button type="success" @click="next" >Next</el-button>
+					  </div>
+				</div>
+			</el-dialog>
+		</div>
+		<script>
+			new Vue({
+				el: '#detail',
+				data:{
+					type:"1",
+					dialogTableVisible:false,
+					searchkey:'',
+					// isShow: false,
+					isShowAboutDialog: false,
+					isShowLogDialog: false,
+					// isShowRegDialog: false,
+					isShowJudgeDialog: false,
+					username: '',
+					from: {},
+					showSelection: false,
+					showIndex: false,  // 展示序号
+					showOperation: false,  // 展示操作列
+					showPagination: true, //展示分页
+					tableColumn: [],  // 列对应数据
+					formatterAll: {},
+					tableData: [],  // 表格数据
+					paginationData: {}, // 分页数据
+					selectArray: [],  // 选中的数据
+					rowBtn: [],
+					// formPage: '',
+					basicTableData: {
+					  loadingTable: true,
+					  tableColumn: [
+                            { prop: 'salesperson_id', label: 'Saleperson Id', width: 130},
+                            { prop: 'name', label: 'Saleperson Name'},
+                            { prop: 'email', label: 'Saleperson Email'},
+                            { prop: 'phone', label: 'Saleperson Phone'},
+                            { prop: 'street', label: 'Street' },
+                            { prop: 'city', label: 'City'},
+                            { prop: 'state', label: 'State'},
+                            { prop: 'zipcode', label: 'Zipcode'},
+                            { prop: 'store_id', label: 'StoreID'},
+                            { prop: 'store_name', label: 'Store Name'},
+                            { prop: 'job_title', label: 'Job Title'},
+                            { prop: 'salary', label: 'Salary'}
+					  ],
+					  tableData: [],
+					  paginationData: {
+					    pageNum: 1,
+					    pageSize: 10,
+					    totalSize: 0
+					  },
+					},
+					formPage:{
+						page: 1,
+						size: 10,
+						id:'',
+						sid:'',
+						job:''
+					},
+					loadingTable:false,
+				},
+				beforeUpdate() {
+				  // 表格抖动解决
+				  this.$nextTick(() => {
+				    this.$refs.mytable.doLayout()
+				  })
+				},
+				created() {
+					this.username = window.localStorage.getItem("userName")
+					this.initData()
+				},
+				methods:{
+					add(){
+						window.location.href="./addSaleperson.html"
+					},
+					next(){
+						window.location.href="./register.html?type="+this.type
+					},
+					toregister(){
+						this.dialogTableVisible = true
+					},
+					topage(url){
+						window.location.href = url
+					},
+					closeTheForm() {
+						this.isShowJudgeDialog = false
+					},
+					quit() {
+						this.$confirm('Are you sure quit？', 'Tips', {
+							confirmButtonText: 'Confirm',
+							cancelButtonText: 'Cancel',
+							type: 'warning'
+						}).then(() => {
+							window.localStorage.clear()
+							this.username = ""
+							this.$forceUpdate()
+							window.location.href = "./index.html"
+						}).catch(() => {
+					
+						});
+					},
+					closeDialog(para) {
+						this[para] = false
+					},
+					aboutClick() {
+						window.location.href = "./index.html"
+					},
+					logClick() {
+						window.location.href = "./login.html"
+					},
+					regClick() {
+						this.isShowJudgeDialog = true
+					},
+					onSuccessLog(data) {
+						this.closeDialog('isShowLogDialog');
+						this.username = data.username
+					},
+					clickFnAll(row, clickFn) {
+					  let data = {
+					    row: row,
+					    clickFn: clickFn
+					  }
+					  this.$emit('clickFn',  data)
+					},
+					initData() {
+					  let { showIndex, showOperation, tableColumn, tableData, formatterAll, paginationData, showSelection, rowBtn, showPagination, formPage } = this.basicTableData
+					  this.tableColumn = tableColumn
+					  this.formatterAll = formatterAll
+					  this.paginationData = paginationData
+					  this.showIndex = showIndex == undefined ? true : showIndex
+					  this.showOperation = showOperation == undefined ? false : true
+					  this.showSelection = showSelection == undefined ? false : true
+					  this.rowBtn = rowBtn
+					  this.showPagination = showPagination == undefined ? true : false
+					  setTimeout(()=>{
+						  this.loadingTable = false
+					  },1200)
+					  this.pageData()
+					},
+					pageData(){
+						this.tableData = []
+						const url = `http://localhost:8080/salepersonlist?saleperson_id=${this.formPage.id}&region_id=${this.formPage.sid}&job_title=${this.formPage.job}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+						axios.get(url) 
+						.then(response => { 
+							if(response.data.code == 200) {
+						          this.tableData = response.data.data.content
+						          this.paginationData.totalSize = response.data.data.totalElements
+						          // this.basicTableData.loadingTable = false
+						          // this.$refs.basicTable.initData()
+						        }
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					// pageData(){
+					// 	// 此处区获取接口的信息
+					// 	this.tableData = []
+					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
+					// 		.then((res) => {
+					// 			if(res.data.code == 0){
+					// 				this.tableData = res.data.data
+					// 			}else{
+					// 				this.$notify({
+					// 					title: 'Error',
+					// 					message: res.data.msg,
+					// 					type: "error"
+					// 				});
+					// 			}
+					// 		}, (error) => {
+					// 			this.$notify({
+					// 				 title: 'Error',
+					// 				 message: 'Networking error',
+					// 				 type: "error"
+					// 			});
+								
+					// 		})
+					// },
+					handleSizeChange(val) {
+					  this.$emit('handleSizeChange', val)
+					},
+					handleCurrentChange(val) {
+					  this.$emit('handleCurrentChange', val)
+					},
+					goItemDetail(row) {
+					  this.$emit('goItemDetail', row)
+					},
+					handleSelectionChange(val) {
+					  this.selectArray = val
+					},
+					rowClassName({row, rowIndex}) {
+					  if(this.formPage == 'cyjgfxHxm') {
+					    return row.checkAttr == 1 ? 'red_bg' : ''
+					  } else {
+					    return ''
+					  }
+					}
+				},
+			})
+		</script>
+	</body>
+</html>
+
+<style lang="scss">
+.BasicTable {
+  margin: 0 15px;
+  overflow: hidden;
+  .el-table {
+    .red_bg {
+      background: #f3acac;
+    }
+    .btn {
+      background: #59BCB7;
+      border-color: #59BCB7;
+      font-size: 14px;
+    }
+    .bbtn {
+      background: #919292;
+      border-color: #919292;
+      font-size: 14px;
+    }
+    .el-checkbox__input.is-checked .el-checkbox__inner{
+      background-color: #016F68;
+      border-color: #016F68;
+    }
+    .el-checkbox__input.is-indeterminate .el-checkbox__inner{
+      background-color: #016F68;
+      border-color: #016F68;
+    }
+    .el-checkbox__input.is-focus .el-checkbox__inner{
+      border-color: #016F68;
+    }
+    .el-checkbox__inner:hover {
+      border-color: #016F68;
+    }
+
+    .gantaCur {
+      cursor: pointer;
+      color: #409eff;
+      text-decoration: underline;
+    }
+  }
+
+  .el-pagination {
+    margin: 20px 0;
+    .el-pager .number:not(.active):hover {
+      color: #59BCB7 !important;
+    }
+    .el-pager .number.active {
+      background: #59BCB7 !important;
+      color: #FFF !important;
+    }
+  }
+
+  .pagination_box {
+    text-align: center;
+    .box_right {
+      line-height: 72px;
+      color: #3D3D3D;
+      img {
+        cursor: pointer;
+        position: relative;
+        top: 5px;
+        margin-left: 6px;
+        &:last-child {
+          margin-left: 16px;
+        }
+      }
+    }
+  }
+
+}
+</style>
