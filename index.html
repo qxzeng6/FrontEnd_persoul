@@ -54,7 +54,7 @@
 				    </el-carousel>
 					<div style="width: 800px;margin: 0 auto;margin-top: 20px;height: 50px;">
 					  <el-input placeholder="Please enter the product name."  v-model="searchkey" class="input-with-select">
-					    <el-button slot="append" icon="el-icon-search"></el-button>
+					    <el-button slot="append" icon="el-icon-search" @click="list"></el-button>
 					  </el-input>
 					</div>
 			    <div class="index-board-list">
@@ -137,19 +137,7 @@
 					    href: '/detail/index'
 					  }
 					],
-					products:[
-					// 	{
-					// 	imageURL:'./assets/slideShow/pic4.jpg',
-					// 	name:'Colcoke',
-					// 	price:'120.00',
-					// 	id:1
-					// },{
-					// 	imageURL:'./assets/slideShow/pic4.jpg',
-					// 	name:'Colcoke',
-					// 	price:'120.00',
-					// 	id:2
-					// }
-					]
+					products:[]
 				},
 				mounted() {
 					this.list()
@@ -225,25 +213,6 @@
 							type: "error"
 						});
 						})
-						// axios.post('http://43.138.186.241:8099/djs-api/api/list', this.from)
-						// 	.then((res) => {
-						// 		// TODO 替换成返回项
-						// 		if (res.data.code == 0) {
-						// 			this.products = res.data.data
-						// 		} else {
-						// 			this.$notify({
-						// 				title: 'Error',
-						// 				message: 'Not Found the productinfo',
-						// 				type: "error"
-						// 			});
-						// 		}
-						// 	}, (error) => {
-						// 		this.$notify({
-						// 			title: 'Error',
-						// 			message: 'Networking error',
-						// 			type: "error"
-						// 		});
-						// 	})
 					},
 					getImageUrl(imagePath){
 						const BaseUrl = "http://localhost:8080/upload/"

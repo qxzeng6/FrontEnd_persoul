@@ -95,18 +95,6 @@
 			            <img v-else style="width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
 			          </div>
 			
-			          <!-- <div v-else-if="item.formatter == 'formatColor'">
-			            <div v-if="scope.row.checkAttr == 2 " :style="{color: 'grey'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			            <div v-if="scope.row.checkAttr == 1 " :style="{background: 'green'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			            <div v-if="scope.row.checkAttr == 0 " :style="{color: 'red'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			          </div> -->
-			
 			          <span v-else>{{ formatterAll[item.formatter](scope.row[item.prop]) }}</span>
 			        </div>
 			
@@ -162,11 +150,93 @@
 					  </div>
 				</div>
 			</el-dialog>
+			<el-dialog title="Eidit Customer Information" :visible.sync="dialogFormVisible">
+				<el-form :model="form">
+				  <el-form-item label="Customer ID" :label-width="120">
+					<el-input v-model="form.customer_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Username" :label-width="120">
+					<el-input v-model="form.user_name" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Customer Name" :label-width="120">
+					<el-input v-model="form.customer_name" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="E-mail" :label-width="120">
+					<el-input v-model="form.email" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Phone Number" :label-width="120">
+					<el-input v-model="form.phone" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Street" :label-width="120">
+					<el-input v-model="form.street" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="City" :label-width="120">
+					<el-input v-model="form.city" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="State" :label-width="120">
+					<el-input v-model="form.state" autocomplete="off"></el-input>
+				  </el-form-item>
+					<el-form-item label="Zipcode" :label-width="120">
+						<el-input type="number" v-model="form.zip_code" autocomplete="off"></el-input>
+					</el-form-item>
+				  <el-form-item label="Kind" :label-width="120">
+					<el-input type="number" v-model="form.kind" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Gender" :label-width="120">
+					<el-input v-model="form.gender" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Age" :label-width="120">
+					<el-input type="number" v-model="form.age" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Income" :label-width="120">
+					<el-input type="number" v-model="form.income" autocomplete="off"></el-input>		  
+				</el-form-item>
+				  <el-form-item label="Marriage" :label-width="120">
+					<el-input v-model="form.marriage" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Bussiness Category" :label-width="120">
+					<el-input v-model="form.business_category" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Annual Income" :label-width="120">
+					<el-input type="number" v-model="form.annual_income" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Birthday" :label-width="120">
+					  <el-date-picker
+							v-model="form.birthday"
+							type="date"
+							placeholder="Please Select">
+						  </el-date-picker>
+				  </el-form-item>				  
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+				  <el-button @click="dialogFormVisible = false">Cancel</el-button>
+				  <el-button type="primary" @click="editNow">Confirm</el-button>
+				</div>
+			</el-dialog>
 		</div>
 		<script>
 			new Vue({
 				el: '#detail',
 				data:{
+					form:{
+						customer_id:'',
+						user_name:'',
+						customer_name:'',
+						email:'',
+						phone:'',
+						street:'',
+						city:'',
+						state:'',
+						zip_code:'',
+						kind:'',
+						gender:'',
+						age:'',
+						income:'',
+						marriage:'',
+						birthday:'',
+						business_category:'',
+						annual_income:''
+					},
 					type:"1",
 					dialogTableVisible:false,
 					searchkey:'',
@@ -176,7 +246,6 @@
 					// isShowRegDialog: false,
 					isShowJudgeDialog: false,
 					username: '',
-					from: {},
 					showSelection: false,
 					showIndex: false,  // 展示序号
 					showOperation: true,  // 展示操作列
@@ -187,27 +256,26 @@
 					paginationData: {}, // 分页数据
 					selectArray: [],  // 选中的数据
 					rowBtn: [],
-					formPage: '',
 					basicTableData: {
 					  loadingTable: true,
 					  tableColumn: [
 					  { prop: 'customer_id', label: 'Customer Id', width: 130},
-            			{ prop: 'user_name', label: 'Customer Username' },
-            			{ prop: 'customer_name', label: 'Customer Name'},
+            			{ prop: 'user_name', label: 'Customer Username', width: 160},
+            			{ prop: 'customer_name', label: 'Customer Name', width: 130},
             			{ prop: 'email', label: 'Email'},
-            			{ prop: 'phone', label: 'Phone'},
+            			{ prop: 'phone_number', label: 'Phone'},
             			{ prop: 'street', label: 'Street' },
             			{ prop: 'city', label: 'City'},
             			{ prop: 'state', label: 'State'},
             			{ prop: 'zip_code', label: 'Zipcode'},
-            			{ prop: 'kind', label: 'Customer Kind'},
-            			{ prop: 'gender', label: 'Gender', width: 130},
+            			{ prop: 'kind', label: 'Customer Kind', width: 130},
+            			{ prop: 'gender', label: 'Gender'},
             			{ prop: 'age', label: 'Age'},
             			{ prop: 'income', label: 'Income'},
             			{ prop: 'marriage', label: 'Marriage'},
-            			{ prop: 'birthday', label: 'Birthday' },
-            			{ prop: 'business_category', label: 'Business Category'},
-            			{ prop: 'annual_income', label: 'Annual Category' },
+            			{ prop: 'date_of_birth', label: 'Birthday' },
+            			{ prop: 'business_category', label: 'Business Category', width: 150},
+            			{ prop: 'annual_income', label: 'Annual Income', width: 150 },
 					  ],
 					  tableData: [],
 					  paginationData: {
@@ -215,6 +283,8 @@
 					    pageSize: 10,
 					    totalSize: 0
 					  },
+					  rowBtn:[{btnLabel:'Edit',btnFn:''},{btnLabel:'Delete',btnFn:''}],
+					  showOperation:true,
 					},
 					formPage:{
 						 page: 1,
@@ -224,6 +294,7 @@
 						  id:''
 					},
 					loadingTable:false,
+					dialogFormVisible:false,
 				},
 				created() {
 					this.username = window.localStorage.getItem("userName")
@@ -236,6 +307,59 @@
 				  })
 				},
 				methods:{
+					editNow(){
+						axios.post("http://localhost:8080/editCustomer",this.form)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Edit success!'
+								});
+								}
+							this.dialogFormVisible = false
+							this.initData()
+						}) 
+						.catch(error => { 
+						this.$message({
+							type: 'error',
+							message: 'Edit failed!'
+						});
+						this.dialogFormVisible = false
+						this.initData()
+						});
+					},
+					editFun(row){
+						this.dialogFormVisible = true
+						this.form = row
+					},
+					delFun(row){
+						this.$confirm('Are you sure del this data?', 'Tips', {
+						confirmButtonText: 'Confirm',
+						cancelButtonText: 'Cancel',
+						type: 'warning'
+						}).then(() => {
+						axios.get("http://localhost:8080/delCustomer?customer_id="+row.customer_id)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Del success!'
+								});
+								this.initData()
+								}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+						this.initData()
+						}).catch(() => {
+						this.$message({
+						type: 'info',
+						message: 'Cancel del'
+						}); 
+						this.initData()         
+						});
+					},
 					add(){
 						window.location.href="./addProduct.html"
 					},
@@ -294,10 +418,11 @@
 					  this.formatterAll = formatterAll
 					  this.paginationData = paginationData
 					  this.showIndex = showIndex == undefined ? true : showIndex
-					  // this.showOperation = showOperation == undefined ? false : true
+					  this.showOperation = showOperation == undefined ? false : true
 					  this.showSelection = showSelection == undefined ? false : true
-					  // this.rowBtn = rowBtn
-					 this.rowBtn = [{btnLabel:'Delete',btnFn:this.del},{btnLabel:'Detail',btnFn:this.todetail},]
+					  rowBtn[0].btnFn = this.editFun
+			 		  rowBtn[1].btnFn = this.delFun
+					  this.rowBtn = rowBtn
 					  this.showPagination = showPagination == undefined ? true : false
 					  setTimeout(()=>{
 						  this.loadingTable = false
@@ -305,7 +430,13 @@
 					  this.pageData()
 					},
 					pageData(){
-						this.tableData = []
+						if(!this.formPage.page){
+						this.formPage.page = 1
+						}
+						if(!this.formPage.size){
+						this.formPage.size = 10
+						}
+						this.tableData = [{}]
 						const url = `http://localhost:8080/userlist?customer_id=${this.formPage.id}&customer_name=${this.formPage.name}&kind=${this.formPage.kind}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
 						axios.get(url) 
 						.then(response => { 
@@ -321,30 +452,6 @@
 						console.error(error); 
 						});
 					},
-					// pageData(){
-					// 	// 此处区获取接口的信息
-					// 	this.tableData = [{id:1,name:'xiaoxiao',age:18,kind:'runing'}]
-					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
-					// 		.then((res) => {
-					// 			// res.header('Access-Control-Allow-Origin', 'http://10.4.68.123:8080')
-					// 			if(res.data.code == 0){
-					// 				this.tableData = res.data.data
-					// 			}else{
-					// 				this.$notify({
-					// 					title: 'Error',
-					// 					message: res.data.msg,
-					// 					type: "error"
-					// 				});
-					// 			}
-					// 		}, (error) => {
-					// 			this.$notify({
-					// 				 title: 'Error',
-					// 				 message: 'Networking error',
-					// 				 type: "error"
-					// 			});
-								
-					// 		})
-					// },
 					handleSizeChange(val) {
 					  this.$emit('handleSizeChange', val)
 					},
@@ -403,6 +510,7 @@
 </html>
 
 <style lang="scss">
+
 .BasicTable {
   margin: 0 15px;
   overflow: hidden;

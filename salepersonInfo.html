@@ -71,7 +71,7 @@
 			
 			    <el-table-column
 			      v-if="showIndex"
-			      width="90"
+			      width="120"
 			      align="center"
 			      type="index"
 			      label="Serial Numver"
@@ -120,7 +120,7 @@
 			          type="primary"
 			          @click="btnItem.btnFn(scope.row)"
 			        >
-			          <!-- <i class="el-icon-document"></i> -->
+			          <i class="el-icon-document"></i>
 			          {{ btnItem.btnLabel }}
 			        </el-button>
 			      </template>
@@ -151,6 +151,50 @@
 					  </div>
 				</div>
 			</el-dialog>
+			<el-dialog title="Eidit Saleperson Information" :visible.sync="dialogFormVisible">
+				<el-form :model="form">
+				  <el-form-item label="Saleperson ID" :label-width="120">
+					<el-input readonly v-model="form.saleperson_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Saleperson Name" :label-width="120">
+					<el-input v-model="form.name" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="E-mail" :label-width="120">
+					<el-input v-model="form.email" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Phone Number" :label-width="120">
+					<el-input v-model="form.phone" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Store ID" :label-width="120">
+					<el-input v-model="form.store_id" autocomplete="off"></el-input>
+				  </el-form-item>
+<!--				  <el-form-item label="Store Name" :label-width="120">-->
+<!--					<el-input v-model="form.store_name" autocomplete="off"></el-input>-->
+<!--				  </el-form-item>-->
+				  <el-form-item label="Job Title" :label-width="120">
+					<el-input v-model="form.job_title" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Salary" :label-width="120">
+					<el-input type="number" v-model="form.salary" autocomplete="off"></el-input>				  
+				  </el-form-item>
+					<el-form-item label="Street" :label-width="120">
+						<el-input v-model="form.street" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="City" :label-width="120">
+						<el-input v-model="form.city" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="State" :label-width="120">
+						<el-input v-model="form.state" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="Zipcode" :label-width="120">
+						<el-input type="number" v-model="form.zipcode" autocomplete="off"></el-input>	
+					</el-form-item>	  
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+				  <el-button @click="dialogFormVisible = false">Cancel</el-button>
+				  <el-button type="primary" @click="editNow">Confirm</el-button>
+				</div>
+			</el-dialog>
 		</div>
 		<script>
 			new Vue({
@@ -168,7 +212,7 @@
 					from: {},
 					showSelection: false,
 					showIndex: false,  // 展示序号
-					showOperation: false,  // 展示操作列
+					showOperation: true,  // 展示操作列
 					showPagination: true, //展示分页
 					tableColumn: [],  // 列对应数据
 					formatterAll: {},
@@ -176,21 +220,32 @@
 					paginationData: {}, // 分页数据
 					selectArray: [],  // 选中的数据
 					rowBtn: [],
-					// formPage: '',
+					form:{
+						salesperson_id:'',
+						name:'',
+						email:'',
+						phone:'',
+						street:'',
+						city:'',
+						state:'',
+						zipcode:'',
+						store_id:'',
+						job_title:'',
+						salary:''
+					},
 					basicTableData: {
 					  loadingTable: true,
 					  tableColumn: [
                             { prop: 'salesperson_id', label: 'Saleperson Id', width: 130},
-                            { prop: 'name', label: 'Saleperson Name'},
-                            { prop: 'email', label: 'Saleperson Email'},
-                            { prop: 'phone', label: 'Saleperson Phone'},
+                            { prop: 'name', label: 'Saleperson Name', width: 150},
+                            { prop: 'email', label: 'Saleperson Email', width: 150},
+                            { prop: 'phone', label: 'Saleperson Phone', width: 150},
                             { prop: 'street', label: 'Street' },
                             { prop: 'city', label: 'City'},
                             { prop: 'state', label: 'State'},
                             { prop: 'zipcode', label: 'Zipcode'},
-                            { prop: 'store_id', label: 'StoreID'},
-                            { prop: 'store_name', label: 'Store Name'},
-                            { prop: 'job_title', label: 'Job Title'},
+                            { prop: 'store_id', label: 'Store ID', width: 130},
+                            { prop: 'job_title', label: 'Job Title', width: 130},
                             { prop: 'salary', label: 'Salary'}
 					  ],
 					  tableData: [],
@@ -199,6 +254,8 @@
 					    pageSize: 10,
 					    totalSize: 0
 					  },
+					  rowBtn:[{btnLabel:'Edit',btnFn:''},{btnLabel:'Delete',btnFn:''}],
+					  showOperation:true,
 					},
 					formPage:{
 						page: 1,
@@ -208,6 +265,7 @@
 						job:''
 					},
 					loadingTable:false,
+					dialogFormVisible:false,
 				},
 				beforeUpdate() {
 				  // 表格抖动解决
@@ -220,6 +278,58 @@
 					this.initData()
 				},
 				methods:{
+					editNow(){
+						axios.post("http://localhost:8080/editSaleperson",this.form)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Edit success!'
+								});
+								}
+							this.dialogFormVisible = false
+							this.initData()
+						}) 
+						.catch(error => { 
+						this.$message({
+							type: 'error',
+							message: 'Edit failed!'
+						});
+						this.dialogFormVisible = false
+						this.initData()
+						});
+					},
+					editFun(row){
+						this.dialogFormVisible = true
+						this.form = row
+					},
+					delFun(row){
+						this.$confirm('Are you sure del this data?', 'Tips', {
+						confirmButtonText: 'Confirm',
+						cancelButtonText: 'Cancel',
+						type: 'warning'
+						}).then(() => {
+						axios.get("http://localhost:8080/delSaleperson?salesperson_id="+row.salesperson_id)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+									type: 'success',
+									message: 'Del success!'
+								});
+								this.initData()
+								}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+						this.initData()
+						}).catch(() => {
+						this.$message({
+						type: 'info',
+						message: 'Cancel del'
+						});          
+						});
+					},
 					add(){
 						window.location.href="./addSaleperson.html"
 					},
@@ -280,6 +390,8 @@
 					  this.showIndex = showIndex == undefined ? true : showIndex
 					  this.showOperation = showOperation == undefined ? false : true
 					  this.showSelection = showSelection == undefined ? false : true
+					  rowBtn[0].btnFn = this.editFun
+			 		  rowBtn[1].btnFn = this.delFun
 					  this.rowBtn = rowBtn
 					  this.showPagination = showPagination == undefined ? true : false
 					  setTimeout(()=>{
@@ -288,11 +400,11 @@
 					  this.pageData()
 					},
 					pageData(){
-						this.tableData = []
+						this.tableData = [{}]
 						const url = `http://localhost:8080/salepersonlist?saleperson_id=${this.formPage.id}&region_id=${this.formPage.sid}&job_title=${this.formPage.job}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
 						axios.get(url) 
 						.then(response => { 
-							if(response.data.code == 200) {
+							if(response.data.code === 200) {
 						          this.tableData = response.data.data.content
 						          this.paginationData.totalSize = response.data.data.totalElements
 						          // this.basicTableData.loadingTable = false
@@ -304,29 +416,6 @@
 						console.error(error); 
 						});
 					},
-					// pageData(){
-					// 	// 此处区获取接口的信息
-					// 	this.tableData = []
-					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
-					// 		.then((res) => {
-					// 			if(res.data.code == 0){
-					// 				this.tableData = res.data.data
-					// 			}else{
-					// 				this.$notify({
-					// 					title: 'Error',
-					// 					message: res.data.msg,
-					// 					type: "error"
-					// 				});
-					// 			}
-					// 		}, (error) => {
-					// 			this.$notify({
-					// 				 title: 'Error',
-					// 				 message: 'Networking error',
-					// 				 type: "error"
-					// 			});
-								
-					// 		})
-					// },
 					handleSizeChange(val) {
 					  this.$emit('handleSizeChange', val)
 					},

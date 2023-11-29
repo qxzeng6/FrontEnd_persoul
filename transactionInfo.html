@@ -51,7 +51,7 @@
 					<span style="width: 150px;">Store ID</span><el-input v-model="formPage.sid" placeholder="please type Store ID"></el-input>
 				</div>
                 <div style="display: flex;align-items: center;margin-left: 20px;"> 
-					<span style="width: 150px;">Salesperson ID</span><el-input v-model="formPage.rid" placeholder="please type Salesperson ID"></el-input>
+					<span style="width: 150px;">Region ID</span><el-input v-model="formPage.rid" placeholder="please type Region ID"></el-input>
 				</div>
 				<el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
 				<!-- <el-button type="primary" style="margin-left: 20px;" @click="add">+  Add</el-button> -->
@@ -71,7 +71,7 @@
 			
 			    <el-table-column
 			      v-if="showIndex"
-			      width="90"
+			      width="120"
 			      align="center"
 			      type="index"
 			      label="Serial Numver"
@@ -119,7 +119,7 @@
 			          type="primary"
 			          @click="btnItem.btnFn(scope.row)"
 			        >
-			          <!-- <i class="el-icon-document"></i> -->
+			          <i class="el-icon-document"></i>
 			          {{ btnItem.btnLabel }}
 			        </el-button>
 			      </template>
@@ -150,9 +150,43 @@
 					  </div>
 				</div>
 			</el-dialog>
+			<el-dialog title="Eidit Transaction" :visible.sync="dialogFormVisible">
+				<el-form :model="form">
+				  <el-form-item label="Product ID" :label-width="120">
+					<el-input v-model="form.product_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Store ID" :label-width="120">
+					<el-input v-model="form.store_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Product Number" :label-width="120">
+					<el-input type="number" v-model="form.product_number" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Order Number" :label-width="120">
+					<el-input type="number" v-model="form.order_number" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Saleperson ID" :label-width="120">
+					<el-input v-model="form.salesperson_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Saleperson Name" :label-width="120">
+					<el-input v-model="form.salesperson_name" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Date" :label-width="120">
+					  <el-date-picker
+							v-model="form.date"
+							type="date"
+							placeholder="Please Select">
+						  </el-date-picker>
+				  </el-form-item>				  
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+				  <el-button @click="dialogFormVisible = false">Cancel</el-button>
+				  <el-button type="primary" @click="editNow">Confirm</el-button>
+				</div>
+			</el-dialog>
 		</div>
 		<script>
 			new Vue({
+				
 				el: '#detail',
 				data:{
 					type:"1",
@@ -164,10 +198,9 @@
 					// isShowRegDialog: false,
 					isShowJudgeDialog: false,
 					username: '',
-					from: {},
 					showSelection: false,
 					showIndex: false,  // 展示序号
-					showOperation: false,  // 展示操作列
+					showOperation: true,  // 展示操作列
 					showPagination: true, //展示分页
 					tableColumn: [],  // 列对应数据
 					formatterAll: {},
@@ -175,19 +208,30 @@
 					paginationData: {}, // 分页数据
 					selectArray: [],  // 选中的数据
 					rowBtn: [],
+					form:{
+						id:'',
+						customer_id:'',
+						product_id:'',
+						store_id:'',
+						product_number:'',
+						order_number:'',
+						salesperson_id:'',
+						date:'',
+						salesperson_name:''
+					},
 					// formPage: '',
 					basicTableData: {
 					  loadingTable: true,
 					  tableColumn: [
                             { prop: 'id', label: 'Transaction Id', width: 130},
-                            { prop: 'customer_id', label: 'Customer ID'},
-							{ prop: 'product_id', label: 'Product ID'},
-							{ prop: 'product_number', label: 'Product Number'},
-							{ prop: 'store_id', label: 'Store ID'},
-                            { prop: 'order_number', label: 'Order Number' },
-                            { prop: 'date', label: 'Date'},
-							{ prop: 'salesperson_id', label: 'saleperson ID'},
-                            { prop: 'salesperson_name', label: 'saleperson Name'}
+                            { prop: 'customer_id', label: 'Customer ID', width: 130},
+							{ prop: 'product_id', label: 'Product ID', width: 130},
+							{ prop: 'product_number', label: 'Product Number', width: 130},
+							{ prop: 'store_id', label: 'Store ID', width: 130},
+                            { prop: 'order_number', label: 'Order Number', width: 130 },
+                            { prop: 'date', label: 'Date', width: 130},
+							{ prop: 'salesperson_id', label: 'Salesperson ID', width: 150},
+                            { prop: 'salesperson_name', label: 'Salesperson Name', width: 150}
 					  ],
 					  tableData: [],
 					  paginationData: {
@@ -195,15 +239,18 @@
 					    pageSize: 10,
 					    totalSize: 0
 					  },
+					  rowBtn:[{btnLabel:'Edit',btnFn:''},{btnLabel:'Delete',btnFn:''}],
+					  showOperation:true,
 					},
 					formPage:{
-						 page: 1,
-						 size: 10,
+						 page: '',
+						 size: '',
 						  id:'',
 						  sid:'',
 						  rid:''
 					},
 					loadingTable:false,
+					dialogFormVisible:false,
 				},
 				beforeUpdate() {
 				  // 表格抖动解决
@@ -216,6 +263,58 @@
 					this.initData()
 				},
 				methods:{
+					editNow(){
+						axios.post("http://localhost:8080/editTransaction",this.form)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Edit success!'
+								});
+								}
+							this.dialogFormVisible = false
+							this.initData()
+						}) 
+						.catch(error => { 
+						this.$message({
+							type: 'error',
+							message: 'Edit failed!'
+						});
+						this.dialogFormVisible = false
+						this.initData()
+						});
+					},
+					editFun(row){
+						this.dialogFormVisible = true
+						this.form = row
+					},
+					delFun(row){
+						this.$confirm('Are you sure del this data?', 'Tips', {
+						confirmButtonText: 'Confirm',
+						cancelButtonText: 'Cancel',
+						type: 'warning'
+						}).then(() => {
+						axios.get("http://localhost:8080/delTransaction?id="+row.id)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Del success!'
+								});
+								this.initData()
+							}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+						this.initData()
+						}).catch(() => {
+							this.$message({
+							type: 'info',
+							message: 'Cancel del'
+							});          
+						});
+					},
 					add(){
 						window.location.href="./addProduct.html"
 					},
@@ -276,6 +375,8 @@
 					  this.showIndex = showIndex == undefined ? true : showIndex
 					  this.showOperation = showOperation == undefined ? false : true
 					  this.showSelection = showSelection == undefined ? false : true
+					  rowBtn[0].btnFn = this.editFun
+			 		  rowBtn[1].btnFn = this.delFun
 					  this.rowBtn = rowBtn
 					  this.showPagination = showPagination == undefined ? true : false
 					  setTimeout(()=>{
@@ -284,8 +385,14 @@
 					  this.pageData()
 					},
 					pageData(){
-						this.tableData = []
-						const url = `http://localhost:8080/transactionlist?id=${this.formPage.id}&salesperson_id=${this.formPage.rid}&store_id=${this.formPage.sid}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
+						if(!this.formPage.page){
+						this.formPage.page = 1
+						}
+						if(!this.formPage.size){
+						this.formPage.size = 10
+						}
+						this.tableData = [{}]
+						const url = `http://localhost:8080/transactionlist?id=${this.formPage.id}&region_id=${this.formPage.rid}&store_id=${this.formPage.sid}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
 						axios.get(url) 
 						.then(response => { 
 								if(response.data.code === 200) {
@@ -300,29 +407,6 @@
 						console.error(error); 
 						});
 					},
-					// pageData(){
-					// 	// 此处区获取接口的信息
-					// 	this.tableData = []
-					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
-					// 		.then((res) => {
-					// 			if(res.data.code == 0){
-					// 				this.tableData = res.data.data
-					// 			}else{
-					// 				this.$notify({
-					// 					title: 'Error',
-					// 					message: res.data.msg,
-					// 					type: "error"
-					// 				});
-					// 			}
-					// 		}, (error) => {
-					// 			this.$notify({
-					// 				 title: 'Error',
-					// 				 message: 'Networking error',
-					// 				 type: "error"
-					// 			});
-								
-					// 		})
-					// },
 					handleSizeChange(val) {
 					  this.$emit('handleSizeChange', val)
 					},
@@ -388,9 +472,9 @@
     }
   }
 
-  .el-pagination {
+  .el-pagination {	
     margin: 20px 0;
-    .el-pager .number:not(.active):hover {
+    .el-pager .number:not(.active):hover {		
       color: #59BCB7 !important;
     }
     .el-pager .number.active {
