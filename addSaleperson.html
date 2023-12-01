@@ -128,7 +128,7 @@
 					      return isLt2M;
 					   },
 					onSubmit() {
-						const url = 'http://localhost:8080/addstore'; 
+						const url = 'http://162.243.190.66:8080/addstore';
 						const data = { 
                             name: this.form.name,
 						    email: this.form.email,
@@ -148,11 +148,11 @@
 						   }
 						axios.post(url, formData) 
 							.then(response => { 
-								if(res.data.code == 0){
+								if(response.data.code === 200){
 									this.$notify({
-										title: 'Sucess',
+										title: 'Success',
 										message: 'Save Success',
-										type: "sucess"
+										type: "success"
 									});
 									setTimeout(()=>{
 										window.location.href = "./salepersonInfo.html"
@@ -171,11 +171,11 @@
 									window.location.href = "./salepersonInfo.html"
 								},1200)
 							}); 
-							this.$notify({
-								 title: 'Error',
-								 message: 'Networking error',
-								 type: "error"
-							});
+							// this.$notify({
+							// 	 title: 'Error',
+							// 	 message: 'Networking error',
+							// 	 type: "error"
+							// });
 							setTimeout(()=>{
 								window.location.href = "./salepersonInfo.html"
 							},1200)

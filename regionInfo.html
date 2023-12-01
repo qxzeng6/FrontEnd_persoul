@@ -8,6 +8,7 @@
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
 		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 	</head>
 	<body>
 		<div id="detail">
@@ -49,6 +50,9 @@
 				</div>
 				<el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
 				<el-button type="primary" style="margin-left: 20px;" @click="add">+  Add</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortStoreNumber">Sort by Store Number</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortVolume">Sort by Total Volume</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortQuantity">Sort by Total Quantity</el-button>
 			</div>
 			<div class="BasicTable" style="margin-top: 20px;">
 			  <el-table ref="mytable" :row-class-name="rowClassName"
@@ -65,7 +69,7 @@
 			
 			    <el-table-column
 			      v-if="showIndex"
-			      width="90"
+			      width="120"
 			      align="center"
 			      type="index"
 			      label="Serial Numver"
@@ -89,18 +93,6 @@
 			            <img v-if="item.clickFn" @click="clickFnAll(scope.row, item.clickFn)" style="cursor: pointer;text-decoration: underline;width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
 			            <img v-else style="width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
 			          </div>
-			
-			          <!-- <div v-else-if="item.formatter == 'formatColor'">
-			            <div v-if="scope.row.checkAttr == 2 " :style="{color: 'grey'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			            <div v-if="scope.row.checkAttr == 1 " :style="{background: 'green'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			            <div v-if="scope.row.checkAttr == 0 " :style="{color: 'red'}">
-			              {{scope.row.checkAttr}}
-			            </div>
-			          </div> -->
 			
 			          <span v-else>{{ formatterAll[item.formatter](scope.row[item.prop]) }}</span>
 			        </div>
@@ -126,7 +118,7 @@
 			          type="primary"
 			          @click="btnItem.btnFn(scope.row)"
 			        >
-			          <!-- <i class="el-icon-document"></i> -->
+			          <i class="el-icon-document"></i>
 			          {{ btnItem.btnLabel }}
 			        </el-button>
 			      </template>
@@ -157,8 +149,35 @@
 					  </div>
 				</div>
 			</el-dialog>
+			<el-dialog title="Eidit Region Information" :visible.sync="dialogFormVisible">
+				<el-form :model="form">
+				  <el-form-item label="Region ID" :label-width="120">
+					<el-input readonly v-model="form.region_id" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Region Name" :label-width="120">
+					<el-input v-model="form.region_name" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Region Manager" :label-width="120">
+					<el-input v-model="form.region_manager" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Store Number" :label-width="120">
+					<el-input type="number" v-model="form.store_number" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Total Sales Volume" :label-width="120">
+					<el-input type="number" v-model="form.sold_amount" autocomplete="off"></el-input>
+				  </el-form-item>
+				  <el-form-item label="Total Sales Quantity" :label-width="120">
+					<el-input type="number" v-model="form.sold_quantity" autocomplete="off"></el-input>
+				  </el-form-item>			  
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+				  <el-button @click="dialogFormVisible = false">Cancel</el-button>
+				  <el-button type="primary" @click="editNow">Confirm</el-button>
+				</div>
+			</el-dialog>
 		</div>
 		<script>
+			ELEMENT.locale(ELEMENT.lang.en)
 			new Vue({
 				el: '#detail',
 				data:{
@@ -174,7 +193,7 @@
 					from: {},
 					showSelection: false,
 					showIndex: false,  // 展示序号
-					showOperation: false,  // 展示操作列
+					showOperation: true,  // 展示操作列
 					showPagination: true, //展示分页
 					tableColumn: [],  // 列对应数据
 					formatterAll: {},
@@ -182,16 +201,23 @@
 					paginationData: {}, // 分页数据
 					selectArray: [],  // 选中的数据
 					rowBtn: [],
-					// formPage: '',
+					form:{
+						region_id:'',
+						region_name:'',
+						region_manager:'',
+						store_number:'',
+						sold_amount:'',
+						sold_quantity:''
+					},
 					basicTableData: {
 					  loadingTable: true,
 					  tableColumn: [
                             { prop: 'region_id', label: 'Region Id', width: 130},
-                            { prop: 'region_name', label: 'Region Name'},
-                            { prop: 'region_manager', label: 'Region Manager'},
-                            { prop: 'store_number', label: 'Store Number'},
-                            { prop: 'sold_amount', label: 'Total Sales Volume' },
-                            { prop: 'sold_quantity', label: 'Total Sales Quantity'}
+                            { prop: 'region_name', label: 'Region Name', width: 150},
+                            { prop: 'region_manager', label: 'Region Manager', width: 150},
+                            { prop: 'store_number', label: 'Store Number', width: 150},
+                            { prop: 'sold_amount', label: 'Total Sales Volume', width: 200 },
+                            { prop: 'sold_quantity', label: 'Total Sales Quantity', width: 200}
 					    ],
 					  tableData: [],
 					  paginationData: {
@@ -199,6 +225,8 @@
 					    pageSize: 10,
 					    totalSize: 0
 					  },
+					  rowBtn:[{btnLabel:'Edit',btnFn:''},{btnLabel:'Delete',btnFn:''}],
+					  showOperation:true,
 					},
 					formPage:{
 						 page: 1,
@@ -206,6 +234,7 @@
 						  id:''
 					},
 					loadingTable:false,
+					dialogFormVisible:false,
 				},
 				beforeUpdate() {
 				  // 表格抖动解决
@@ -218,6 +247,110 @@
 					this.initData()
 				},
 				methods:{
+					sortStoreNumber(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortregion?by=store_number`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					sortVolume(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortregion?by=sold_amount`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					sortQuantity(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortregion?by=sold_quantity`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					editNow(){
+						axios.post("http://162.243.190.66:8080/editRegion",this.form)
+						.then(response => { 
+							if(response.data.code === 200) {
+								this.$message({
+								type: 'success',
+								message: 'Edit success!'
+								});
+								}
+							this.dialogFormVisible = false
+							this.initData()
+						}) 
+						.catch(error => { 
+						this.$message({
+							type: 'error',
+							message: 'Edit failed!'
+						});
+						this.dialogFormVisible = false
+						this.initData()
+						});
+					},
+					editFun(row){
+						this.dialogFormVisible = true
+						this.form = row
+					},
+					delFun(row){
+						this.$confirm('Are you sure del this data?', 'Tips', {
+						confirmButtonText: 'Confirm',
+						cancelButtonText: 'Cancel',
+						type: 'warning'
+						}).then(() => {
+						axios.get("http://162.243.190.66:8080/delRegion?region_id="+row.region_id)
+						.then(response => { 
+							if(response.data.code === 200) {
+									this.$message({
+								type: 'success',
+								message: 'Del success!'
+									});
+								this.initData()
+								}
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						this.initData()
+						});
+						
+						}).catch(() => {
+						this.$message({
+						type: 'info',
+						message: 'Cancel del'
+						});          
+						});
+					},
 					add(){
 						window.location.href="./addRegion.html"
 					},
@@ -278,6 +411,8 @@
 					  this.showIndex = showIndex == undefined ? true : showIndex
 					  this.showOperation = showOperation == undefined ? false : true
 					  this.showSelection = showSelection == undefined ? false : true
+					  rowBtn[0].btnFn = this.editFun
+			 		  rowBtn[1].btnFn = this.delFun
 					  this.rowBtn = rowBtn
 					  this.showPagination = showPagination == undefined ? true : false
 					  setTimeout(()=>{
@@ -286,11 +421,17 @@
 					  this.pageData()
 					},
 					pageData(){
-						this.tableData = []
-						const url = `http://localhost:8080/regionlist?region_id=${this.formPage.id}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+						if(!this.formPage.page){
+						this.formPage.page = 1
+						}
+						if(!this.formPage.size){
+						this.formPage.size = 10
+						}					
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/regionlist?region_id=${this.formPage.id}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
 						axios.get(url) 
 						.then(response => { 
-							if(response.data.code == 200) {
+							if(response.data.code === 200) {
 						          this.tableData = response.data.data.content
 						          this.paginationData.totalSize = response.data.data.totalElements
 						          // this.basicTableData.loadingTable = false
@@ -302,29 +443,6 @@
 						console.error(error); 
 						});
 					},
-					// pageData(){
-					// 	// 此处区获取接口的信息
-					// 	this.tableData = []
-					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
-					// 		.then((res) => {
-					// 			if(res.data.code == 0){
-					// 				this.tableData = res.data.data
-					// 			}else{
-					// 				this.$notify({
-					// 					title: 'Error',
-					// 					message: res.data.msg,
-					// 					type: "error"
-					// 				});
-					// 			}
-					// 		}, (error) => {
-					// 			this.$notify({
-					// 				 title: 'Error',
-					// 				 message: 'Networking error',
-					// 				 type: "error"
-					// 			});
-								
-					// 		})
-					// },
 					handleSizeChange(val) {
 					  this.$emit('handleSizeChange', val)
 					},

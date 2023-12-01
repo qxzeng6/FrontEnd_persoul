@@ -108,7 +108,7 @@
 					      return isLt2M;
 					   },
 					onSubmit() {
-						const url = 'http://localhost:8080/addregion'; 
+						const url = 'http://162.243.190.66:8080/addregion';
 						const data = { 
                             region_name: this.form.region_name,
 						    region_manager: this.form.region_manager,
@@ -123,11 +123,11 @@
 						   }
 						axios.post(url, formData) 
 							.then(response => { 
-								if(res.data.code == 0){
+								if(response.data.code === 200){
 									this.$notify({
-										title: 'Sucess',
+										title: 'Success',
 										message: 'Save Success',
-										type: "sucess"
+										type: "Success"
 									});
 									setTimeout(()=>{
 										window.location.href = "./regionInfo.html"

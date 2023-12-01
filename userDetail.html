@@ -8,6 +8,7 @@
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
 		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 	</head>
 	<body>
 		<div id="detail">
@@ -41,63 +42,64 @@
 				</div>
 			</div>
 			<div class="user">
-				<el-form ref="form" :model="form" label-width="80px">
+				<el-form ref="form" :model="form" label-width="150px">
 					<el-form-item label="ID">
-					  <el-input  readonly  v-model="form.customer_id"></el-input>
+					  <el-input  v-model="form.customer_id"></el-input>
 					</el-form-item>
 					<el-form-item label="Name">
-						<el-input readonly  v-model="form.customer_name"></el-input>
+						<el-input v-model="form.customer_name"></el-input>
 					</el-form-item>
 					<el-form-item label="Username">
-						<el-input readonly  v-model="form.user_name"></el-input>
+						<el-input v-model="form.user_name"></el-input>
 					</el-form-item>
 					<el-form-item label="Kind">
-						<el-input readonly v-model="form.kind"></el-input>
+						<el-input v-model="form.kind"></el-input>
 					</el-form-item>
 					<el-form-item label="Age">
-						<el-input readonly v-model="form.age"></el-input>
+						<el-input v-model="form.age"></el-input>
 					</el-form-item>
 					<el-form-item label="Gender">
-						<el-input  readonly  v-model="form.gender"></el-input>
+						<el-input  v-model="form.gender"></el-input>
 					  </el-form-item>
 					  <el-form-item label="Income">
-						  <el-input readonly  v-model="form.income"></el-input>
+						  <el-input v-model="form.income"></el-input>
 					  </el-form-item>
 					  <el-form-item label="Marriage">
-						  <el-input readonly  v-model="form.marriage"></el-input>
+						  <el-input v-model="form.marriage"></el-input>
 					  </el-form-item>
 					  <el-form-item label="Date of Birth">
-						  <el-input readonly v-model="form.date_of_birth"></el-input>
+						  <el-input v-model="form.date_of_birth"></el-input>
 					  </el-form-item>
 					  <el-form-item label="Pet Kind">
-						  <el-input readonly v-model="form.pet_kind"></el-input>
+						  <el-input v-model="form.pet_kind"></el-input>
 					  </el-form-item>
 					<el-form-item label="E-mail">
-						<el-input  readonly  v-model="form.email"></el-input>
+						<el-input  v-model="form.email"></el-input>
 					</el-form-item>
 					<el-form-item label="Phone Number">
-						<el-input readonly  v-model="form.phone_number"></el-input>
+						<el-input v-model="form.phone_number"></el-input>
 					</el-form-item>
 					<el-form-item label="Street">
-						<el-input readonly v-model="form.street"></el-input>
+						<el-input v-model="form.street"></el-input>
 					</el-form-item>
 					<el-form-item label="City">
-						<el-input readonly v-model="form.city"></el-input>
+						<el-input v-model="form.city"></el-input>
 					</el-form-item>
 					<el-form-item label="State">
-						<el-input readonly  v-model="form.state"></el-input>
+						<el-input v-model="form.state"></el-input>
 					</el-form-item>
 					<el-form-item label="Zipcode">
-						<el-input readonly  v-model="form.zip_code"></el-input>
+						<el-input v-model="form.zip_code"></el-input>
 					</el-form-item>
 					<el-form-item label="Business Category">
-						<el-input readonly v-model="form.business_category"></el-input>
+						<el-input v-model="form.business_category"></el-input>
 					</el-form-item>
 					<el-form-item label="Annual Income">
-						<el-input readonly v-model="form.annual_income"></el-input>
+						<el-input v-model="form.annual_income"></el-input>
 					</el-form-item>
 					<el-form-item>
 						<el-button @click="cancel">Back</el-button>
+						<el-button @click="editUser" type="primary">Update</el-button>
 					</el-form-item>
 				</el-form>
 			</div>
@@ -113,6 +115,7 @@
 			</el-dialog>
 		</div>
 		<script>
+			ELEMENT.locale(ELEMENT.lang.en)
 			new Vue({
 				el: '#detail',
 				data:{
@@ -145,10 +148,42 @@
 					this.username = window.localStorage.getItem("userName")
 				},
 				methods:{
+					editUser(){
+						this.$confirm('Are you sure Update this data?', 'Tips', {
+						  confirmButtonText: 'Confirm',
+						  cancelButtonText: 'Cancel',
+						  type: 'warning'
+						}).then(() => {
+							axios.post("http://162.243.190.66:8080/editUser",this.form)
+							.then(response => { 
+									if(response.data.code === 200) {
+							          this.$message({
+											type: 'success',
+											message: 'Edit success!'
+							          });
+									  this.userdetail()
+							        }
+							}) 
+							.catch(error => { 
+							console.error(error); 
+								this.$message({
+									type: 'error',
+									message: 'Edit failed!'
+								});
+							});
+							this.userdetail()
+						  
+						}).catch(() => {
+						  this.$message({
+							type: 'info',
+							message: 'Cancel del'
+						  });          
+						});
+					},
 					userdetail(){
 						this.form = {}
 						this.username = window.localStorage.getItem("userName")
-						const url = `http://localhost:8080/userdetail?username=${this.username}`; 
+						const url = `http://162.243.190.66:8080/userdetail?username=${this.username}`;
 						axios.get(url) 
 						.then(response => { 
 								if(response.data.code === 200) {

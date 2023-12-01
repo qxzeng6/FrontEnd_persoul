@@ -47,61 +47,61 @@
 						<div class="g-form-line">
 							<span class="g-form-label">Username:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.user_name" placeholder="Please enter the username">
+								<input type="text" v-model="from.user_name" placeholder="Please enter the username" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">Password:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.password" placeholder="Please enter the password">
+								<input type="text" v-model="from.password" placeholder="Please enter the password" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">E-mail:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.email" placeholder="Please enter the E-mail number">
+								<input type="text" v-model="from.email" placeholder="Please enter the E-mail number" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">Tel:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.phone_number" placeholder="Please enter the Tel number">
+								<input type="text" v-model="from.phone_number" placeholder="Please enter the Tel number" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">Street:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.street" placeholder="Please enter the street">
+								<input type="text" v-model="from.street" placeholder="Please enter the street" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">City:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.city" placeholder="Please enter the E-mail city">
+								<input type="text" v-model="from.city" placeholder="Please enter the E-mail city" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">State:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.state" placeholder="Please enter the state">
+								<input type="text" v-model="from.state" placeholder="Please enter the state" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">Zipcode:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.zip_code" placeholder="Please enter the zipcode">
+								<input type="text" v-model="from.zip_code" placeholder="Please enter the zipcode" required>
 							</div>
 						</div>
 						<div class="g-form-line">
 							<span class="g-form-label">Name:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.customer_name" placeholder="Please enter your name">
+								<input type="text" v-model="from.customer_name" placeholder="Please enter your name" required>
 							</div>
 						</div>
 						<div v-if="type ==1" class="g-form-line">
 							<span class="g-form-label">Age:</span>
 							<div class="g-form-input">
-								<input type="number" v-model="from.age" placeholder="Please enter your age">
+								<input type="number" v-model="from.age" placeholder="Please enter your age" required>
 							</div>
 						</div>
 						<div v-if="type ==1" class="g-form-line" style="display: flex;align-items: center;">
@@ -114,7 +114,7 @@
 						<div v-if="type ==1" class="g-form-line">
 							<span class="g-form-label">Income:</span>
 							<div class="g-form-input">
-								<input type="number" v-model="from.income" placeholder="Please enter your income">
+								<input type="number" v-model="from.income" placeholder="Please enter your income" required>
 							</div>
 						</div>
 						<div v-if="type ==1" class="g-form-line" style="display: flex;align-items: center;">
@@ -127,19 +127,19 @@
 						<div v-if="type ==1" class="g-form-line">
 							<span class="g-form-label">Pet Kind:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.pet_kind" placeholder="Please enter your pet kind">
+								<input type="text" v-model="from.pet_kind" placeholder="Please enter your pet kind" required>
 							</div>
 						</div>
 						<div v-if="type ==2" class="g-form-line">
 							<span class="g-form-label">Annual Income:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.annual_income" placeholder="Please enter your annual income">
+								<input type="text" v-model="from.annual_income" placeholder="Please enter your annual income" required>
 							</div>
 						</div>
 						<div v-if="type ==2" class="g-form-line">
 							<span class="g-form-label">Bussiness Category:</span>
 							<div class="g-form-input">
-								<input type="text" v-model="from.business_category" placeholder="Please enter your business category">
+								<input type="text" v-model="from.business_category" placeholder="Please enter your business category" required>
 							</div>
 						</div>
 						<div class="g-form-line">
@@ -257,11 +257,20 @@
 						this.username = data.username
 					},
 					onRegister() {
+						const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+						if(!emailRegex.test(this.from.email)){
+						this.$notify({
+							title: 'Error',
+							message: "Valid Email",
+							type: "error"
+						});
+						return
+						}
 						this.from.kind=this.type
 						// axios.post('http://43.138.186.241:8099/djs-api/api/register', this.from)
-						axios.post('http://localhost:8080/register', this.from)
+						axios.post('http://162.243.190.66:8080/register', this.from)
 							.then((res) => {
-								if(res.data.code == 0){
+								if(res.data.code === 200){
 									window.location.href="./login.html"
 								}else{
 									this.$notify({

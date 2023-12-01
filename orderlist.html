@@ -8,6 +8,7 @@
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
 		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 	</head>
 	<body>
 		<div id="detail">
@@ -40,12 +41,7 @@
 					</div>
 				</div>
 			</div>
-			<!-- <div class="daoitems">
-				<a href="./userlist.html">CustomerInfo</a>
-				<a href="./productInfo.html">ProductInfo</a>
-				<a href="./orderlist.html" class="active">OrderListInfo</a>
-			</div> -->
-			<div style="margin-left: 10px;width: 90%;">
+			<div style="margin-left: 20px; margin-right: 20px;">
 				<div style="display: flex;align-items: center;margin-top: 20px;margin-left: 20px;">
 					<div style="display: flex;align-items: center;">
 						<span style="width: 120px;">Order ID</span><el-input v-model="formPage.id" placeholder="please type order ID"></el-input>
@@ -103,18 +99,6 @@
 				            <img v-else style="width:18px;vertical-align: middle;margin-top: -3px;margin-right:4px" :src="formatterAll[item.formatter](scope.row)" />
 				          </div>
 				
-				          <!-- <div v-else-if="item.formatter == 'formatColor'">
-				            <div v-if="scope.row.checkAttr == 2 " :style="{color: 'grey'}">
-				              {{scope.row.checkAttr}}
-				            </div>
-				            <div v-if="scope.row.checkAttr == 1 " :style="{background: 'green'}">
-				              {{scope.row.checkAttr}}
-				            </div>
-				            <div v-if="scope.row.checkAttr == 0 " :style="{color: 'red'}">
-				              {{scope.row.checkAttr}}
-				            </div>
-				          </div> -->
-				
 				          <span v-else>{{ formatterAll[item.formatter](scope.row[item.prop]) }}</span>
 				        </div>
 				
@@ -171,8 +155,10 @@
 					  </div>
 				</div>
 			</el-dialog>
+			
 		</div>
 		<script>
+			ELEMENT.locale(ELEMENT.lang.en)
 			new Vue({
 				el: '#detail',
 				data:{
@@ -198,7 +184,7 @@
 					from: {},
 					showSelection: false,
 					showIndex: false,  // 展示序号
-					showOperation: true,  // 展示操作列
+					showOperation: false,  // 展示操作列
 					showPagination: true, //展示分页
 					tableColumn: [],  // 列对应数据
 					formatterAll: {},
@@ -206,18 +192,18 @@
 					paginationData: {}, // 分页数据
 					selectArray: [],  // 选中的数据
 					rowBtn: [],
-					// formPage: '',
 					basicTableData: {
 					  loadingTable: true,
 					  tableColumn: [
 					        { prop: 'id', label: 'Transaction Id', width: 130},
 							{ prop: 'product_id', label: 'Product ID'},
-							{ prop: 'store_id', label: 'Store ID'},					  							//{ prop: 'region_name', label: 'Region Name'},
-					        { prop: 'salesperson_id', label: 'saleperson ID'},
+							{ prop: 'store_id', label: 'Store ID'},
+					        { prop: 'product_number', label: 'Product Number'},
 					        { prop: 'order_number', label: 'Order Number' },
+						    { prop: 'salesperson_id', label: 'Salesperson ID' },
 					        { prop: 'date', label: 'Date'},
-					        { prop: 'salesperson_name', label: 'saleperson Name'}
-					  ],
+					        { prop: 'salesperson_name', label: 'Saleperson Name'},
+						],
 					  tableData: [],
 					  paginationData: {
 					    pageNum: 1,
@@ -243,6 +229,7 @@
 						}],
 						value: '',
 					loadingTable:false,
+					dialogFormVisible:false,
 				},
 				beforeUpdate() {
 				  // 表格抖动解决
@@ -323,16 +310,20 @@
 					  this.pageData()
 					},
 					pageData(){
+						if(!this.formPage.page){
+						this.formPage.page = 1
+						}
+						if(!this.formPage.size){
+						this.formPage.size = 10
+						}
 						this.tableData = []
 						this.username = window.localStorage.getItem("userName")
-						const url = `http://localhost:8080/orderlist?username=${this.username}&id=${this.formPage.id}&status=${this.formPage.status}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+						const url = `http://162.243.190.66:8080/orderlist?username=${this.username}&id=${this.formPage.id}&status=${this.formPage.status}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
 						axios.get(url) 
 						.then(response => { 
 								if(response.data.code === 200) {
 						          this.tableData = response.data.data.content
 						          this.paginationData.totalSize = response.data.data.totalElements
-						          // this.basicTableData.loadingTable = false
-						          // this.$refs.basicTable.initData()
 						        }
 						console.log(response.data); 
 						}) 
@@ -340,30 +331,6 @@
 						console.error(error); 
 						});
 					},
-					// pageData(){
-					// 	// 此处区获取接口的信息
-					// 	this.tableData = []
-					// 	axios.post('http://43.138.186.241:8099/djs-api/api/pageData', this.formPage)
-					// 		.then((res) => {
-					// 			// res.header('Access-Control-Allow-Origin', 'http://10.4.68.123:8080')
-					// 			if(res.data.code == 0){
-					// 				this.tableData = res.data.data
-					// 			}else{
-					// 				this.$notify({
-					// 					title: 'Error',
-					// 					message: res.data.msg,
-					// 					type: "error"
-					// 				});
-					// 			}
-					// 		}, (error) => {
-					// 			this.$notify({
-					// 				 title: 'Error',
-					// 				 message: 'Networking error',
-					// 				 type: "error"
-					// 			});
-								
-					// 		})
-					// },
 					handleSizeChange(val) {
 					  this.$emit('handleSizeChange', val)
 					},

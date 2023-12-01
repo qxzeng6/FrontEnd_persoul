@@ -55,6 +55,7 @@
 				</div>
 				<el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
 				<el-button type="primary" style="margin-left: 20px;" @click="add">+  Add</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sort">Sort by Salary</el-button>
 			</div>
 			<div class="BasicTable" style="margin-top: 20px;">
 			  <el-table ref="mytable" :row-class-name="rowClassName"
@@ -168,9 +169,6 @@
 				  <el-form-item label="Store ID" :label-width="120">
 					<el-input v-model="form.store_id" autocomplete="off"></el-input>
 				  </el-form-item>
-<!--				  <el-form-item label="Store Name" :label-width="120">-->
-<!--					<el-input v-model="form.store_name" autocomplete="off"></el-input>-->
-<!--				  </el-form-item>-->
 				  <el-form-item label="Job Title" :label-width="120">
 					<el-input v-model="form.job_title" autocomplete="off"></el-input>
 				  </el-form-item>
@@ -278,8 +276,25 @@
 					this.initData()
 				},
 				methods:{
+					sort(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortsaleperson?by=salary`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
 					editNow(){
-						axios.post("http://localhost:8080/editSaleperson",this.form)
+						axios.post("http://162.243.190.66:8080/editSaleperson",this.form)
 						.then(response => { 
 							if(response.data.code === 200) {
 								this.$message({
@@ -309,7 +324,7 @@
 						cancelButtonText: 'Cancel',
 						type: 'warning'
 						}).then(() => {
-						axios.get("http://localhost:8080/delSaleperson?salesperson_id="+row.salesperson_id)
+						axios.get("http://162.243.190.66:8080/delSaleperson?salesperson_id="+row.salesperson_id)
 						.then(response => { 
 							if(response.data.code === 200) {
 								this.$message({
@@ -401,7 +416,7 @@
 					},
 					pageData(){
 						this.tableData = [{}]
-						const url = `http://localhost:8080/salepersonlist?saleperson_id=${this.formPage.id}&region_id=${this.formPage.sid}&job_title=${this.formPage.job}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+						const url = `http://162.243.190.66:8080/salepersonlist?saleperson_id=${this.formPage.id}&region_id=${this.formPage.sid}&job_title=${this.formPage.job}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
 						axios.get(url) 
 						.then(response => { 
 							if(response.data.code === 200) {

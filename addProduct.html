@@ -124,7 +124,7 @@
 					      return isLt2M;
 					   },
 					onSubmit() {
-						const url = 'http://localhost:8080/add'; 
+						const url = 'http://162.243.190.66:8080/add';
 						const data = { 
 							product_name: this.form.product_name, 
 							price: this.form.price,
@@ -142,11 +142,11 @@
 						formData.set("file",this.logoFile.file,this.logoFile.file.name)
 						axios.post(url, formData) 
 							.then(response => { 
-								if(res.data.code == 0){
+								if(response.data.code === 200){
 									this.$notify({
-										title: 'Sucess',
+										title: 'Success',
 										message: 'Save Success',
-										type: "sucess"
+										type: "success"
 									});								
 									setTimeout(()=>{
 										window.location.href = "./productInfo.html"
@@ -166,11 +166,11 @@
 								},1200)
 								console.error(error); 
 							}); 
-							this.$notify({
-								 title: 'Error',
-								 message: 'Networking error',
-								 type: "error"
-							});
+							// this.$notify({
+							// 	 title: 'Error',
+							// 	 message: 'Networking error',
+							// 	 type: "error"
+							// });
 							setTimeout(()=>{
 								window.location.href = "./productInfo.html"
 							},1200)

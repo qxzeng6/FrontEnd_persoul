@@ -142,7 +142,7 @@
 						id:''
 					},
 					product:{
-						image:"",
+						image:'',
 						product_name:'',
 						price:'',
 						product_description:'',
@@ -150,10 +150,6 @@
 						inventory_amount:''
 					}
 				},
-				// mounted() {
-				// 	this.form.id = this.$route.query.id
-				// 	this.detail()
-				// },
 				mounted() {
 					const currentURL = window.location.href;
 					const productIdMatch = currentURL.match(/[?&]product_id=([^&]+)/);
@@ -208,9 +204,9 @@
 					},
 					detail(){
 						const url = `http://localhost:8080/productdetail?product_id=${this.form.id}`; 
-						axios.get(url)
+						axios.get(url) 
 						.then(response => { 
-							if(response.data.code === 200) {
+							if(response.data.code == 200) {
 						          this.product = response.data.data.content
 						        }else{
 									this.$notify({
@@ -231,40 +227,23 @@
 							type: "error"
 						});
 						})
-						// axios.post('http://43.138.186.241:8099/djs-api/api/detail', this.from)
-						// 	.then((res) => {
-						// 		// TODO 替换成返回项
-						// 		if(response.data.code == 200) {
-						//           this.product = response.data.data.conten
-						// 		}else{
-						// 			this.$notify({
-						// 				title: 'Error',
-						// 				message: 'Not Found the productinfo',
-						// 				type: "error"
-						// 			});
-						// 			setTimeout(()=>{
-						// 				window.history.go(-1)
-						// 			},1200)
-						// 		}
-						// 	}, (error) => {
-						// 		console.log(error)
-						// 		this.$notify({
-						// 			 title: 'Error',
-						// 			 message: 'Networking error',
-						// 			 type: "error"
-						// 		});
-						// 	})
 					},
 					confirmBuy() {
 						let buyVersionsArray = _.map(this.versions, (item) => {
 							return item.value
 						});
 						this.username = window.localStorage.getItem("userName")
-						const url = `http://localhost:8080/purchase?product_id=${this.form.id}&buy_number=${this.buyNum}&username=${this.username}`; 
+						const url = `http://162.243.190.66:8080/purchase?product_id=${this.form.id}&buy_number=${this.buyNum}&username=${this.username}`;
 						axios.get(url) 
 						.then(response => { 
 							if(response.data.code === 200) {
-						          this.product = response.data.data.content
+								  this.$message({
+									type: 'success',
+									message: 'Buying successfully!'
+								  });
+								  setTimeout(()=>{
+									window.location.href="./orderlist.html"
+								  },1200)								  
 						        }else{
 									this.$notify({
 										title: 'Error',
@@ -289,7 +268,7 @@
 						this[attr] = val;
 					},
 					getImageUrl(imagePath){
-						const BaseUrl = "http://localhost:8080/upload/"
+						const BaseUrl = "http://162.243.190.66:8080/upload/"
 						return BaseUrl+imagePath
 					},
 				},

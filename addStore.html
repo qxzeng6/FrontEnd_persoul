@@ -120,7 +120,7 @@
 					      return isLt2M;
 					   },
 					onSubmit() {
-						const url = 'http://localhost:8080/addstore'; 
+						const url = 'http://162.243.190.66:8080/addstore';
 						const data = { 
                             store_name: this.form.store_name,
 						    region_id: this.form.region_id,
@@ -138,11 +138,11 @@
 						   }
 						axios.post(url, formData) 
 							.then(response => { 
-								if(res.data.code == 0){
+								if(res.data.code == 200){
 									this.$notify({
-										title: 'Sucess',
+										title: 'Success',
 										message: 'Save Success',
-										type: "sucess"
+										type: "success"
 									});
 									setTimeout(()=>{
 										window.location.href = "./storeInfo.html"

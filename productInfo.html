@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
  </head>
  <body>
   <div id="detail">
@@ -52,6 +53,9 @@
     </div>
     <el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
     <el-button type="primary" style="margin-left: 20px;" @click="add">+  Add</el-button>
+    <el-button type="primary" style="margin-left: 20px;" @click="sortPrice">Sort by Price</el-button>
+    <el-button type="primary" style="margin-left: 20px;" @click="sortInventory">Sort by Inventory</el-button>
+    <el-button type="primary" style="margin-left: 20px;" @click="sortSold">Sort by Sold Quantity</el-button>
    </div>
    <div class="BasicTable" style="margin-top: 20px;">
      <el-table ref="mytable" :row-class-name="rowClassName"
@@ -152,7 +156,7 @@
    <el-dialog title="Eidit Product" :visible.sync="dialogFormVisible">
     <el-form :model="form">
       <el-form-item label="Product ID" :label-width="120">
-        <el-input v-model="form.product_id" autocomplete="off"></el-input>
+        <el-input readonly v-model="form.product_id" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="Product Name" :label-width="120">
         <el-input v-model="form.product_name" autocomplete="off"></el-input>
@@ -172,7 +176,9 @@
     <el-form-item label="Product Sold Quantity" :label-width="120">
       <el-input type="number" type="number" v-model="form.sold_quantity" autocomplete="off"></el-input>
     </el-form-item>
-    
+    <el-form-item label="Saleperson ID" :label-width="120">
+      <el-input type="number" v-model="form.saleperson_id" autocomplete="off"></el-input>
+    </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialogFormVisible = false">Cancel</el-button>
@@ -181,6 +187,7 @@
   </el-dialog>
   </div>
   <script>
+   ELEMENT.locale(ELEMENT.lang.en)
    new Vue({
     el: '#detail',
     data:{
@@ -209,6 +216,7 @@
 						product_id:'',
 						inventory_amount:'',
 						price:'',
+                        saleperson_id:'',
 						product_kind:'',
 						product_description:'',
 						sold_quantity:''
@@ -220,6 +228,7 @@
          { prop: 'product_name', label: 'Product Name', width: 130},
          { prop: 'inventory_amount', label: 'Product Inventory Amount', width: 200},
          { prop: 'price', label: 'Price'},
+         { prop: 'saleperson_id', label: 'Saleperson ID', width: 180},
          { prop: 'product_kind', label: 'Product Kind', width: 130 },
          { prop: 'product_description', label: 'Product Description', width: 200},
          { prop: 'sold_quantity', label: 'Product Sold Quantity', width: 200}
@@ -253,8 +262,59 @@
      this.initData()
     },
     methods:{
+      sortPrice(){
+        this.tableData = [{}]
+        const url = `http://162.243.190.66:8080/sortproduct?by=price`;
+        axios.get(url) 
+        .then(response => { 
+        if(response.data.code === 200) {
+                  this.tableData = response.data.data.content
+                  this.paginationData.totalSize = response.data.data.totalElements
+                  // this.basicTableData.loadingTable = false
+                  // this.$refs.basicTable.initData()
+                }
+        console.log(response.data); 
+        }) 
+        .catch(error => { 
+        console.error(error); 
+        });
+      },
+      sortInventory(){
+        this.tableData = [{}]
+        const url = `http://162.243.190.66:8080/sortproduct?by=inventory_amount`;
+        axios.get(url) 
+        .then(response => { 
+        if(response.data.code === 200) {
+                  this.tableData = response.data.data.content
+                  this.paginationData.totalSize = response.data.data.totalElements
+                  // this.basicTableData.loadingTable = false
+                  // this.$refs.basicTable.initData()
+                }
+        console.log(response.data); 
+        }) 
+        .catch(error => { 
+        console.error(error); 
+        });
+      },
+      sortSold(){
+        this.tableData = [{}]
+        const url = `http://162.243.190.66:8080/sortproduct?by=sold_quantity`;
+        axios.get(url) 
+        .then(response => { 
+        if(response.data.code === 200) {
+                  this.tableData = response.data.data.content
+                  this.paginationData.totalSize = response.data.data.totalElements
+                  // this.basicTableData.loadingTable = false
+                  // this.$refs.basicTable.initData()
+                }
+        console.log(response.data); 
+        }) 
+        .catch(error => { 
+        console.error(error); 
+        });
+      },
       editNow(){
-        axios.post("http://localhost:8080/editProduct",this.form)
+        axios.post("http://162.243.190.66:8080/editProduct",this.form)
         .then(response => { 
             if(response.data.code === 200) {
                   this.$message({
@@ -284,7 +344,7 @@
           cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
-          axios.get("http://localhost:8080/delProduct?product_id="+row.product_id)
+          axios.get("http://162.243.190.66:8080/delProduct?product_id="+row.product_id)
           .then(response => { 
               if(response.data.code === 200) {
                 this.$message({
@@ -383,7 +443,7 @@
       this.formPage.size = 10
       }
       this.tableData = [{}]
-      const url = `http://localhost:8080/list?product_id=${this.formPage.id}&product_name=${this.formPage.name}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+      const url = `http://162.243.190.66:8080/list?product_id=${this.formPage.id}&product_name=${this.formPage.name}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
       axios.get(url) 
       .then(response => { 
        if(response.data.code === 200) {

@@ -8,6 +8,7 @@
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
 		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+		<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 	</head>
 	<body>
 		<div id="detail">
@@ -45,15 +46,16 @@
 			<div style="margin-left: 180px;width: 90%;">
 			<div style="display: flex;align-items: center;margin-top: 20px;margin-left: 20px;">
 				<div style="display: flex;align-items: center;">
-					<span style="width: 120px;">Customer ID</span><el-input v-model="formPage.id" placeholder="please type user kind"></el-input>
+					<span style="width: 120px;">Customer ID</span><el-input v-model="formPage.id" placeholder="please type customer ID"></el-input>
 				</div>
 				<div style="display: flex;align-items: center;margin-left: 40px;">
 					<span style="width: 120px;">Username</span><el-input v-model="formPage.name" placeholder="please type username"></el-input>
 				</div>
-				<div style="display: flex;align-items: center;margin-left: 40px;"> 
-					<span style="width: 80px;">Kind</span><el-input v-model="formPage.kind" placeholder="please type user kind"></el-input>
-				</div>
 				<el-button type="success" style="margin-left: 20px;" @click="pageData">Search</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="group">Group by gender</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortage">Sort by Age</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortannual">Sort by Annual Income</el-button>
+				<el-button type="primary" style="margin-left: 20px;" @click="sortincome">Sort by Income</el-button>
 			</div>
 			<div class="BasicTable" style="margin-top: 20px;">
 			  <el-table ref="mytable" :row-class-name="rowClassName"
@@ -153,7 +155,7 @@
 			<el-dialog title="Eidit Customer Information" :visible.sync="dialogFormVisible">
 				<el-form :model="form">
 				  <el-form-item label="Customer ID" :label-width="120">
-					<el-input v-model="form.customer_id" autocomplete="off"></el-input>
+					<el-input readonly v-model="form.customer_id" autocomplete="off"></el-input>
 				  </el-form-item>
 				  <el-form-item label="Username" :label-width="120">
 					<el-input v-model="form.user_name" autocomplete="off"></el-input>
@@ -176,9 +178,9 @@
 				  <el-form-item label="State" :label-width="120">
 					<el-input v-model="form.state" autocomplete="off"></el-input>
 				  </el-form-item>
-					<el-form-item label="Zipcode" :label-width="120">
-						<el-input type="number" v-model="form.zip_code" autocomplete="off"></el-input>
-					</el-form-item>
+				  <el-form-item label="Zipcode" :label-width="120">
+					<el-input type="number" v-model="form.zip_code" autocomplete="off"></el-input>		  
+				</el-form-item>
 				  <el-form-item label="Kind" :label-width="120">
 					<el-input type="number" v-model="form.kind" autocomplete="off"></el-input>
 				  </el-form-item>
@@ -215,6 +217,7 @@
 			</el-dialog>
 		</div>
 		<script>
+			ELEMENT.locale(ELEMENT.lang.en)
 			new Vue({
 				el: '#detail',
 				data:{
@@ -307,8 +310,76 @@
 				  })
 				},
 				methods:{
+					group(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080//groupCutomerByGender`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					sortannual(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortcustomer?by=annual_income`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					sortage(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortcustomer?by=age`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
+					sortincome(){
+						this.tableData = [{}]
+						const url = `http://162.243.190.66:8080/sortcustomer?by=income`;
+						axios.get(url) 
+						.then(response => { 
+						if(response.data.code === 200) {
+								this.tableData = response.data.data.content
+								this.paginationData.totalSize = response.data.data.totalElements
+								// this.basicTableData.loadingTable = false
+								// this.$refs.basicTable.initData()
+								}
+						console.log(response.data); 
+						}) 
+						.catch(error => { 
+						console.error(error); 
+						});
+					},
 					editNow(){
-						axios.post("http://localhost:8080/editCustomer",this.form)
+						axios.post("http://162.243.190.66:8080/editCustomer",this.form)
 						.then(response => { 
 							if(response.data.code === 200) {
 								this.$message({
@@ -338,7 +409,7 @@
 						cancelButtonText: 'Cancel',
 						type: 'warning'
 						}).then(() => {
-						axios.get("http://localhost:8080/delCustomer?customer_id="+row.customer_id)
+						axios.get("http://162.243.190.66:8080/delCustomer?customer_id="+row.customer_id)
 						.then(response => { 
 							if(response.data.code === 200) {
 								this.$message({
@@ -437,10 +508,10 @@
 						this.formPage.size = 10
 						}
 						this.tableData = [{}]
-						const url = `http://localhost:8080/userlist?customer_id=${this.formPage.id}&customer_name=${this.formPage.name}&kind=${this.formPage.kind}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`; 
+						const url = `http://162.243.190.66:8080/userlist?customer_id=${this.formPage.id}&customer_name=${this.formPage.name}&kind=${this.formPage.kind}&page_index=${this.formPage.page}&page_size=${this.formPage.size}`;
 						axios.get(url) 
 						.then(response => { 
-							if(response.data.code == 200) {
+							if(response.data.code === 200) {
 						          this.tableData = response.data.data.content
 						          this.paginationData.totalSize = response.data.data.totalElements
 						          // this.basicTableData.loadingTable = false
